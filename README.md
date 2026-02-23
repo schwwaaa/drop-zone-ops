@@ -46,7 +46,7 @@ Every local file you drop in will automatically be prefixed with this path in th
 
 ### 3. Add files to your playlist
 <p align="left">
-  <img width="65%" height="65%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-dropfiles.png?raw=true"/>  
+  <img width="40%" height="40%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-dropfiles.png?raw=true"/>  
 </p>
 
 Three ways to add content:
@@ -82,7 +82,7 @@ Click the colored tag badge on any item to cycle through tags. Use **Sort by Tag
 
 ### 6. Edit item details
 <p align="left">
-  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-edititem.png?raw=true"/>  
+  <img width="55%" height="55%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-edititem.png?raw=true"/>  
 </p>
 
 Click any item's **title** to open the edit modal. From there you can update:
@@ -95,7 +95,7 @@ Click any item's **title** to open the edit modal. From there you can update:
 
 ### 7. Import from CSV or JSON
 <p align="left">
-  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-csvjsonimport.png?raw=true"/>  
+  <img width="35%" height="35%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-csvjsonimport.png?raw=true"/>  
 </p>
 
 If you have a list of files already organized in a spreadsheet or data file, click **Import CSV / JSON** to load them in bulk.
@@ -131,11 +131,8 @@ Template files for both formats are included in the repo: `playlist-template.csv
 
 ### 8. Name and export your playlist
 
-NEED IMAGE
-
 <p align="left">
-  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-exportnamedm3u.png?raw=true
-"/>  
+  <img width="30%" height="30%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-exportnamedm3u.png?raw=true"/>  
 </p>
 
 Type a name for your playlist in the **Playlist Name** field (e.g. `saturday-night-block`). Then click **Export .M3U Playlist** — the file downloads directly to your machine as `saturday-night-block.m3u`.
