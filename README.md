@@ -30,7 +30,7 @@ Just open `index.html` in any modern browser. No server needed. No install. Work
 
 ### 2. Set your local base path
 <p align="center">
-  <img width="300px" height="950px" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-localbasepath.png?raw=true"/>  
+  <img width="75%" height="75%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-localbasepath.png?raw=true"/>  
 </p>
 
 If you're using local video files, set your **Base Path** at the top of the left panel before adding files.
@@ -46,7 +46,7 @@ Every local file you drop in will automatically be prefixed with this path in th
 
 ### 3. Add files to your playlist
 <p align="center">
-  <img width="300px" height="950px" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-dropfiles.png?raw=true"/>  
+  <img width="65%" height="65%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-dropfiles.png?raw=true"/>  
 </p>
 
 Three ways to add content:
@@ -59,14 +59,14 @@ Three ways to add content:
 
 ### 4. Arrange your playlist
 <p align="center">
-  <img width="300px" height="950px" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-playlist.png?raw=true"/>  
+  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-playlist.png?raw=true"/>  
 </p>
 
 Drag items up and down by the **⠿** handle on the left side of each row. This is where Drop Zone Ops earns its keep — you can build a custom broadcast block with interstitials, ad breaks, and bumpers exactly where you want them.
 
 ### 5. Tag your content
 <p align="center">
-  <img width="300px" height="950px" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-modifycategory.png?raw=true"/>  
+  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-modifycategory.png?raw=true"/>  
 </p>
 
 Each item has a **tag** that categorizes its role in the playlist:
@@ -82,7 +82,7 @@ Click the colored tag badge on any item to cycle through tags. Use **Sort by Tag
 
 ### 6. Edit item details
 <p align="center">
-  <img width="300px" height="950px" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-edititem.png?raw=true"/>  
+  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-edititem.png?raw=true"/>  
 </p>
 
 Click any item's **title** to open the edit modal. From there you can update:
@@ -95,7 +95,7 @@ Click any item's **title** to open the edit modal. From there you can update:
 
 ### 7. Import from CSV or JSON
 <p align="center">
-  <img width="300px" height="950px" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-importcsv.png?raw=true"/>  
+  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-csvjsonimport.png?raw=true"/>  
 </p>
 
 If you have a list of files already organized in a spreadsheet or data file, click **Import CSV / JSON** to load them in bulk.
@@ -142,7 +142,7 @@ The exported file is compatible with both **VLC** and **OBS VLC Source**.
 ## Using the playlist in OBS
 
 <p align="center">
-  <img width="300px" height="950px" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-importcsv.png?raw=true"/>  
+  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-obs.png?raw=true"/>  
 </p>
 
 1. In OBS, add a new source → **VLC Video Source**
