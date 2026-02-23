@@ -1,0 +1,58 @@
+[
+  {
+    "path": "/Users/yourname/Videos/show-intro.mp4",
+    "name": "Show Intro",
+    "duration": "0:45",
+    "tag": "bumper",
+    "group": "block-1"
+  },
+  {
+    "path": "/Users/yourname/Videos/episode-01.mp4",
+    "name": "Episode 01 — The Beginning",
+    "duration": "22:30",
+    "tag": "content",
+    "group": "block-1"
+  },
+  {
+    "path": "https://your-s3-bucket.s3.amazonaws.com/ads/soda-ad.mp4",
+    "name": "Soda Commercial",
+    "duration": "0:30",
+    "tag": "commercial",
+    "group": "ad-break-1"
+  },
+  {
+    "path": "https://www.dropbox.com/scl/fi/YOUR_FILE_ID/ad-cars.mp4?dl=1",
+    "name": "Car Commercial",
+    "duration": "0:30",
+    "tag": "commercial",
+    "group": "ad-break-1"
+  },
+  {
+    "path": "/Users/yourname/Videos/back-to-show-bumper.mp4",
+    "name": "And We're Back",
+    "duration": "0:08",
+    "tag": "bumper",
+    "group": "ad-break-1"
+  },
+  {
+    "path": "/Users/yourname/Videos/episode-01-part2.mp4",
+    "name": "Episode 01 — Part 2",
+    "duration": "21:15",
+    "tag": "content",
+    "group": "block-2"
+  },
+  {
+    "path": "https://your-cdn.com/interstitials/station-id.mp4",
+    "name": "Station ID",
+    "duration": "0:15",
+    "tag": "interstitial",
+    "group": "block-2"
+  },
+  {
+    "path": "/Users/yourname/Videos/show-outro.mp4",
+    "name": "Show Outro",
+    "duration": "1:00",
+    "tag": "bumper",
+    "group": "block-2"
+  }
+]

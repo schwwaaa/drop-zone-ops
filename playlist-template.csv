@@ -1,0 +1,9 @@
+path,name,duration,tag,group
+/Users/yourname/Videos/show-intro.mp4,Show Intro,0:45,bumper,block-1
+/Users/yourname/Videos/episode-01.mp4,Episode 01 — The Beginning,22:30,content,block-1
+https://your-s3-bucket.s3.amazonaws.com/ads/soda-ad.mp4,Soda Commercial,0:30,commercial,ad-break-1
+https://www.dropbox.com/scl/fi/YOUR_FILE_ID/ad-cars.mp4?dl=1,Car Commercial,0:30,commercial,ad-break-1
+/Users/yourname/Videos/back-to-show-bumper.mp4,And We're Back,0:08,bumper,ad-break-1
+/Users/yourname/Videos/episode-01-part2.mp4,Episode 01 — Part 2,21:15,content,block-2
+https://your-cdn.com/interstitials/station-id.mp4,Station ID,0:15,interstitial,block-2
+/Users/yourname/Videos/show-outro.mp4,Show Outro,1:00,bumper,block-2

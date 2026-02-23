@@ -1,0 +1,2289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DROP ZONE OPS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #FF4500;
+    --orange-dim: #c23400;
+    --orange-glow: rgba(255,69,0,0.3);
+    --dark: #0a0a0f;
+    --dark2: #111118;
+    --dark3: #1a1a24;
+    --dark4: #222230;
+    --border: #2a2a3a;
+    --text: #e8e8f0;
+    --text-dim: #888899;
+    --green: #39ff14;
+    --cyan: #00ffcc;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SCANLINE overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    position: relative;
+    background-image: url('https://ultimateactionmovies.com/wp-content/uploads/2022/09/Drop-Zone-Movie-696x464.jpg');
+    background-size: cover;
+    background-position: center 30%;
+    border-bottom: 3px solid var(--orange);
+    padding: 3rem 2rem 2rem;
+    text-align: center;
+    overflow: hidden;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(10,10,15,0.5) 0%, rgba(10,10,15,0.85) 100%);
+  }
+  .header-inner { position: relative; z-index: 2; }
+  .logo {
+    font-family: 'Russo One', sans-serif;
+    font-size: clamp(3rem, 8vw, 6rem);
+    color: var(--orange);
+    text-shadow: 0 0 40px var(--orange-glow), 2px 2px 0 #000;
+    letter-spacing: 4px;
+    line-height: 1;
+  }
+  .tagline {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    margin-top: 0.5rem;
+    text-transform: uppercase;
+  }
+  .status-bar {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1rem;
+  }
+  .status-pill {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text-dim);
+    background: rgba(0,0,0,0.4);
+  }
+  .status-pill.live { border-color: var(--green); color: var(--green); animation: blink 1.5s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── MAIN LAYOUT ── */
+  .app {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 0;
+    min-height: calc(100vh - 180px);
+  }
+
+  /* ── LEFT PANEL ── */
+  .left-panel {
+    border-right: 2px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: var(--dark2);
+    border-bottom: 2px solid var(--border);
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    color: var(--orange);
+    text-transform: uppercase;
+  }
+  .section-header .dot {
+    width: 8px; height: 8px;
+    background: var(--orange);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--orange);
+  }
+
+  /* ── DROP ZONE ── */
+  .dropzone-area {
+    margin: 20px;
+    border: 2px dashed var(--border);
+    border-radius: 4px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--dark2);
+    position: relative;
+    overflow: hidden;
+  }
+  .dropzone-area::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(255,69,0,0.03) 100%);
+  }
+  .dropzone-area:hover, .dropzone-area.drag-over {
+    border-color: var(--orange);
+    background: rgba(255,69,0,0.05);
+    box-shadow: inset 0 0 30px rgba(255,69,0,0.08);
+  }
+  .dropzone-area.drag-over { border-style: solid; }
+  .dz-icon { font-size: 3rem; margin-bottom: 12px; display: block; }
+  .dz-label {
+    font-family: 'Russo One', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  .dz-sub {
+    font-size: 0.8rem;
+    color: #555566;
+    margin-top: 6px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* ── URL INPUT ── */
+  .url-input-row {
+    display: flex;
+    gap: 8px;
+    margin: 0 20px 12px;
+  }
+  .url-input {
+    flex: 1;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .url-input::placeholder { color: #444455; }
+  .url-input:focus { border-color: var(--orange); }
+  .url-name-input {
+    width: 140px;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    padding: 10px 10px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .url-name-input::placeholder { color: #444455; }
+  .url-name-input:focus { border-color: var(--orange); }
+
+  /* ── PLAYLIST ── */
+  .playlist-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 20px 20px;
+  }
+  .playlist-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #333344;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+  }
+
+  .playlist-item {
+    display: grid;
+    grid-template-columns: 28px 1fr auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 4px;
+    cursor: grab;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .playlist-item:hover { border-color: var(--orange); background: var(--dark4); }
+  .playlist-item.dragging { opacity: 0.4; border-color: var(--orange); }
+  .playlist-item.drag-target { border-top: 2px solid var(--orange); }
+
+  .item-handle {
+    color: #444455;
+    font-size: 1rem;
+    text-align: center;
+    cursor: grab;
+    user-select: none;
+  }
+  .item-handle:hover { color: var(--orange); }
+
+  .item-info { min-width: 0; }
+  .item-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+  }
+  .item-name:hover { color: var(--orange); }
+  .item-name-edit {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    background: var(--dark);
+    border: 1px solid var(--orange);
+    border-radius: 2px;
+    color: var(--orange);
+    padding: 2px 6px;
+    width: 100%;
+    outline: none;
+  }
+  .item-meta {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .item-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1px solid;
+  }
+  .tag-content { background: rgba(0,255,204,0.1); color: var(--cyan); border-color: rgba(0,255,204,0.3); }
+  .tag-commercial { background: rgba(255,69,0,0.15); color: var(--orange); border-color: rgba(255,69,0,0.4); }
+  .tag-bumper { background: rgba(57,255,20,0.1); color: var(--green); border-color: rgba(57,255,20,0.3); }
+  .tag-interstitial { background: rgba(255,200,0,0.1); color: #ffc800; border-color: rgba(255,200,0,0.3); }
+  .tag-other { background: rgba(150,150,200,0.1); color: #aaaacc; border-color: rgba(150,150,200,0.3); }
+
+  .item-del {
+    background: none;
+    border: none;
+    color: #333344;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 2px;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .item-del:hover { color: #ff3333; }
+
+  .item-num {
+    position: absolute;
+    top: 3px; left: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    color: #333344;
+  }
+
+  /* ── RIGHT PANEL ── */
+  .right-panel {
+    display: flex;
+    flex-direction: column;
+    background: var(--dark2);
+  }
+
+  /* ── TOOLBAR BUTTONS ── */
+  .toolbar {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+  .btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    width: 100%;
+  }
+  .btn-primary {
+    background: var(--orange);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--orange-dim); transform: translateY(-1px); box-shadow: 0 4px 20px var(--orange-glow); }
+  .btn-secondary {
+    background: var(--dark3);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--orange); color: var(--text); }
+  .btn-danger {
+    background: var(--dark3);
+    color: #ff4444;
+    border: 1px solid rgba(255,68,68,0.2);
+  }
+  .btn-danger:hover { background: rgba(255,68,68,0.1); border-color: #ff4444; }
+  .btn-icon { font-size: 1rem; }
+
+  /* ── IMPORT PANEL ── */
+  .import-section { padding: 16px; border-bottom: 2px solid var(--border); }
+  .import-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .import-drop {
+    border: 1px dashed var(--border);
+    border-radius: 3px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: #444455;
+    letter-spacing: 1px;
+  }
+  .import-drop:hover { border-color: var(--cyan); color: var(--cyan); }
+  .import-format {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: #333344;
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+  .import-format span { color: var(--cyan); }
+
+  /* ── STATS PANEL ── */
+  .stats-section { padding: 16px; border-bottom: 2px solid var(--border); }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+  .stat-val {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--orange);
+    font-weight: bold;
+  }
+
+  /* ── PREVIEW ── */
+  .preview-section { flex: 1; padding: 16px; overflow: auto; }
+  .preview-box {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: #555566;
+    line-height: 1.6;
+    max-height: 280px;
+    overflow-y: auto;
+    white-space: pre;
+  }
+  .preview-box .ext-header { color: var(--green); }
+  .preview-box .ext-inf { color: var(--orange); }
+  .preview-box .ext-path { color: var(--cyan); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 30px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--dark3);
+    border: 1px solid var(--orange);
+    border-radius: 4px;
+    padding: 12px 24px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    color: var(--orange);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s;
+    z-index: 10000;
+    box-shadow: 0 4px 30px var(--orange-glow);
+    text-transform: uppercase;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: var(--green); color: var(--green); box-shadow: 0 4px 30px rgba(57,255,20,0.2); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--orange);
+    border-radius: 4px;
+    padding: 28px;
+    width: 500px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal h3 {
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    color: var(--orange);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .modal-close {
+    float: right;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.3rem;
+    cursor: pointer;
+    margin-top: -4px;
+  }
+  .modal-close:hover { color: var(--orange); }
+  .form-row { margin-bottom: 14px; }
+  .form-label {
+    display: block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .form-input, .form-select {
+    width: 100%;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--orange); }
+  .form-select option { background: var(--dark3); }
+  .modal-btns { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+
+  /* ── TAG SELECT ── */
+  .tag-select-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .tag-opt {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    background: var(--dark3);
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .tag-opt:hover { border-color: var(--orange); }
+  .tag-opt.selected { border-color: var(--orange); color: var(--orange); background: rgba(255,69,0,0.1); }
+  .tag-opt[data-val="commercial"].selected { border-color: var(--orange); color: var(--orange); }
+  .tag-opt[data-val="bumper"].selected { border-color: var(--green); color: var(--green); background: rgba(57,255,20,0.1); }
+  .tag-opt[data-val="interstitial"].selected { border-color: #ffc800; color: #ffc800; background: rgba(255,200,0,0.1); }
+  .tag-opt[data-val="content"].selected { border-color: var(--cyan); color: var(--cyan); background: rgba(0,255,204,0.1); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--dark); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--orange-dim); }
+
+  /* ── ABOUT BUTTON ── */
+  .about-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 14px;
+    padding: 8px 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .about-btn:hover {
+    border-color: var(--orange);
+    color: var(--text);
+    background: rgba(255,69,0,0.08);
+  }
+  .about-btn::before { content: '?'; font-family: 'Russo One', sans-serif; color: var(--orange); }
+
+  /* ── ABOUT MODAL ── */
+  .about-modal {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--orange);
+    border-radius: 4px;
+    padding: 32px;
+    width: 580px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .about-modal h3 {
+    font-family: 'Russo One', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    color: var(--orange);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .about-modal .about-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .about-modal p {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    color: var(--text);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+  .about-modal p::before { content: none; }
+  .about-modal .about-links {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .about-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-decoration: none;
+    border-radius: 3px;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .about-link-primary {
+    background: var(--orange);
+    color: #fff;
+  }
+  .about-link-primary:hover { background: var(--orange-dim); transform: translateY(-1px); }
+  .about-link-secondary {
+    background: var(--dark3);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .about-link-secondary:hover { border-color: var(--orange); color: var(--text); }
+
+
+  /* ══════════════════════════════════════
+     COMMERCIAL INJECTION PANEL
+  ══════════════════════════════════════ */
+  .injector-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 5000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+  .injector-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .injector-panel {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: min(1100px, 100vw);
+    background: var(--dark);
+    border-left: 2px solid var(--cyan);
+    z-index: 5001;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    transform: translateX(100%);
+    transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: -20px 0 60px rgba(0,0,0,0.8);
+  }
+  .injector-panel.open { transform: translateX(0); }
+
+  .injector-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: var(--dark2);
+    border-bottom: 2px solid var(--border);
+  }
+  .injector-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    text-transform: uppercase;
+  }
+  .injector-close {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    transition: all 0.15s;
+  }
+  .injector-close:hover { border-color: var(--orange); color: var(--orange); }
+
+  .injector-body {
+    display: grid;
+    grid-template-columns: 280px 1fr 300px;
+    overflow: hidden;
+  }
+
+  .inj-col {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .inj-col:last-child { border-right: none; }
+
+  .inj-col-header {
+    padding: 12px 16px;
+    background: var(--dark2);
+    border-bottom: 1px solid var(--border);
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    color: var(--orange);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .inj-col-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Library items */
+  .lib-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    transition: border-color 0.15s;
+  }
+  .lib-item:hover { border-color: var(--cyan); }
+  .lib-item-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .lib-item-dur {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--cyan);
+    white-space: nowrap;
+  }
+  .lib-item-del {
+    background: none; border: none; color: #333344;
+    cursor: pointer; font-size: 0.9rem; padding: 2px 4px;
+    transition: color 0.15s; flex-shrink: 0;
+  }
+  .lib-item-del:hover { color: #ff3333; }
+
+  /* Rules */
+  .rule-card {
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px;
+    position: relative;
+  }
+  .rule-card.is-default { border-color: var(--orange); }
+  .rule-card.is-override { border-color: #ffc800; }
+  .rule-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+  .badge-default { background: rgba(255,69,0,0.15); color: var(--orange); border: 1px solid rgba(255,69,0,0.3); }
+  .badge-override { background: rgba(255,200,0,0.1); color: #ffc800; border: 1px solid rgba(255,200,0,0.3); }
+  .rule-del {
+    position: absolute; top: 8px; right: 8px;
+    background: none; border: none; color: #333344;
+    cursor: pointer; font-size: 0.9rem;
+    transition: color 0.15s;
+  }
+  .rule-del:hover { color: #ff3333; }
+  .rule-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 7px;
+    flex-wrap: wrap;
+  }
+  .rule-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    white-space: nowrap;
+    text-transform: uppercase;
+    min-width: 80px;
+  }
+  .rule-input {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    padding: 5px 8px;
+    outline: none;
+    width: 60px;
+    transition: border-color 0.15s;
+  }
+  .rule-input:focus { border-color: var(--orange); }
+  .rule-select {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    padding: 5px 8px;
+    outline: none;
+    flex: 1;
+    min-width: 0;
+    transition: border-color 0.15s;
+  }
+  .rule-select:focus { border-color: var(--orange); }
+  .rule-select option { background: var(--dark3); }
+
+  /* Bumper row */
+  .bumper-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    padding-top: 7px;
+    border-top: 1px solid var(--border);
+  }
+  .bumper-check {
+    accent-color: var(--cyan);
+    width: 13px; height: 13px;
+    cursor: pointer;
+  }
+  .bumper-select {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    padding: 4px 6px;
+    outline: none;
+    flex: 1;
+    min-width: 0;
+  }
+  .bumper-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--cyan);
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  /* JSON preview */
+  .json-box {
+    flex: 1;
+    background: var(--dark);
+    border: none;
+    border-radius: 0;
+    color: #7ec8e3;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    line-height: 1.6;
+    padding: 14px;
+    resize: none;
+    outline: none;
+    overflow-y: auto;
+    white-space: pre;
+  }
+  .json-box:focus { outline: none; }
+
+  /* Content preview list */
+  .content-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .cp-item {
+    padding: 5px 8px;
+    border-radius: 2px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cp-content { background: rgba(0,255,204,0.05); color: var(--cyan); border-left: 2px solid var(--cyan); }
+  .cp-commercial { background: rgba(255,69,0,0.08); color: var(--orange); border-left: 2px solid var(--orange); }
+  .cp-bumper { background: rgba(57,255,20,0.05); color: var(--green); border-left: 2px solid var(--green); }
+  .cp-num { color: #333344; min-width: 20px; }
+
+  /* Injector footer */
+  .injector-footer {
+    padding: 14px 24px;
+    background: var(--dark2);
+    border-top: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .injector-status {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+  .inj-btn-row { display: flex; gap: 8px; }
+
+  /* ── FOOTER ── */
+  .footer {
+    padding: 20px 40px;
+    border-top: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    background: var(--dark2);
+    flex-wrap: wrap;
+  }
+  .footer-left {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: #333344;
+    letter-spacing: 2px;
+    line-height: 1.8;
+  }
+  .footer-clock { color: var(--text-dim); display: block; }
+  .footer-links {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .footer-link {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    text-decoration: none;
+    padding: 7px 14px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    transition: all 0.15s;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .footer-link:hover { border-color: var(--orange); color: var(--orange); }
+  .footer-link.highlight { border-color: var(--orange-dim); color: var(--orange); }
+  .footer-link.highlight:hover { background: var(--orange); color: #fff; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .app { grid-template-columns: 1fr; }
+    .left-panel { border-right: none; border-bottom: 2px solid var(--border); }
+    .footer { justify-content: center; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">DROP ZONE OPS</div>
+    <div class="tagline">M3U Playlist Ops // OBS Automation // Broadcast Engineering</div>
+    <div class="status-bar">
+      <div class="status-pill live">● LIVE BUILDER</div>
+      <div class="status-pill">CLIENT-SIDE</div>
+      <div class="status-pill" id="item-count-pill">0 ITEMS</div>
+    </div>
+    <button class="about-btn" onclick="document.getElementById('about-modal').classList.add('open')">
+      What is this?
+    </button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app">
+
+  <!-- ── LEFT: PLAYLIST BUILDER ── -->
+  <div class="left-panel">
+
+    <div class="section-header">
+      <div class="dot"></div>
+      DROP ZONE — ADD FILES TO PLAYLIST
+    </div>
+
+    <!-- Base Path -->
+    <div style="margin: 16px 20px 0; display:flex; flex-direction:column; gap:6px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <label for="base-path" style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:2px;color:var(--text-dim);white-space:nowrap;text-transform:uppercase;">📁 Local Base Path</label>
+        <div id="base-path-status" style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#333344;margin-left:auto;"></div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <input
+          id="base-path"
+          type="text"
+          placeholder="e.g. /Users/yourname/Videos  or  C:\Users\yourname\Videos"
+          style="flex:1;background:var(--dark3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.75rem;padding:10px 12px;outline:none;transition:border-color 0.2s;"
+          oninput="onBasePathChange()"
+          onfocus="this.style.borderColor='var(--orange)'"
+          onblur="this.style.borderColor=this.value?'var(--green)':'var(--border)'"
+        >
+        <button class="btn btn-secondary" style="width:auto;padding:10px 14px;white-space:nowrap;font-size:0.65rem;" onclick="applyBasePathToAll()" title="Prepend base path to all existing local items">APPLY ALL</button>
+      </div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#333344;line-height:1.5;">
+        Set once → all dropped files use this path. Remote URLs are unaffected.
+      </div>
+    </div>
+
+    <!-- Dropzone -->
+    <div class="dropzone-area" id="dropzone" style="margin-top:12px;">
+      <span class="dz-icon">🪂</span>
+      <div class="dz-label">Drop video files here</div>
+      <div class="dz-sub">files will be prefixed with your base path above</div>
+      <input type="file" id="file-input" multiple accept="video/*,audio/*" style="display:none">
+    </div>
+
+    <!-- URL + Name row -->
+    <div class="url-input-row">
+      <input class="url-input" id="url-input" type="text" placeholder="paste remote URL (dropbox, s3, http...)">
+      <input class="url-name-input" id="url-name-input" type="text" placeholder="display name">
+      <button class="btn btn-primary" style="width:auto;padding:10px 16px;white-space:nowrap" onclick="addUrl()">+ ADD</button>
+    </div>
+
+    <!-- Playlist items -->
+    <div class="section-header" style="margin-top:0">
+      <div class="dot"></div>
+      PLAYLIST <span id="list-count" style="color:var(--text-dim);margin-left:8px">— EMPTY</span>
+    </div>
+
+    <div class="playlist-container" id="playlist">
+      <div class="playlist-empty" id="empty-msg">🪂 &nbsp; NO FILES YET — DROP OR PASTE TO BEGIN</div>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT: CONTROLS ── -->
+  <div class="right-panel">
+
+    <div class="section-header">
+      <div class="dot"></div>
+      OPERATIONS
+    </div>
+
+    <div class="toolbar">
+      <div style="margin-bottom:8px">
+        <div class="form-label" style="margin-bottom:5px;font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:2px;color:var(--text-dim)">PLAYLIST NAME</div>
+        <input class="form-input" id="playlist-name" type="text" placeholder="my-playlist" style="width:100%;background:var(--dark3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.8rem;padding:9px 12px;outline:none;transition:border-color 0.2s" onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+
+      <button class="btn btn-primary" onclick="exportM3U()">
+        <span class="btn-icon">📡</span> Export .M3U Playlist
+      </button>
+      <button class="btn btn-secondary" onclick="document.getElementById('file-input').click()">
+        <span class="btn-icon">📁</span> Browse Local Files
+      </button>
+      <button class="btn btn-secondary" onclick="document.getElementById('import-input').click()">
+        <span class="btn-icon">📋</span> Import CSV / JSON
+      </button>
+      <button class="btn btn-secondary" onclick="sortByTag()">
+        <span class="btn-icon">🔀</span> Sort by Tag
+      </button>
+      <button class="btn btn-danger" onclick="clearAll()">
+        <span class="btn-icon">✕</span> Clear Playlist
+      </button>
+      <input type="file" id="import-input" accept=".csv,.json" style="display:none" onchange="handleImport(event)">
+      <div style="border-top:1px solid var(--border);margin-top:4px;padding-top:12px;">
+        <button class="btn" style="background:linear-gradient(135deg,#0d1b2a,#1a2744);border:1px solid var(--cyan);color:var(--cyan);letter-spacing:2px;" onclick="openInjector()">
+          <span class="btn-icon">💉</span> Commercial Injection
+        </button>
+      </div>
+    </div>
+
+    <!-- Import Format Info -->
+    <div class="import-section">
+      <div class="import-label">Import Format Reference</div>
+      <div class="import-format">
+        <span>CSV headers:</span><br>
+        path, name, duration, tag, group<br><br>
+        <span>JSON array:</span><br>
+        [{"path":"...","name":"...","duration":0,<br>
+        "tag":"content","group":"block-1"}]<br><br>
+        <span>tags:</span> content / commercial / bumper / interstitial
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-section">
+      <div class="section-header" style="padding:0 0 10px 0;border:none;background:none;font-size:0.65rem">
+        <div class="dot" style="width:6px;height:6px"></div> PLAYLIST STATS
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">TOTAL ITEMS</span>
+        <span class="stat-val" id="stat-total">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">CONTENT</span>
+        <span class="stat-val" id="stat-content">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">COMMERCIAL</span>
+        <span class="stat-val" id="stat-commercial">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">BUMPER</span>
+        <span class="stat-val" id="stat-bumper">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">INTERSTITIAL</span>
+        <span class="stat-val" id="stat-interstitial">0</span>
+      </div>
+      <div class="stat-row" style="border-top:1px solid var(--orange-dim);margin-top:4px;padding-top:8px">
+        <span class="stat-label" style="color:var(--text)">TOTAL TIME</span>
+        <span class="stat-val" id="stat-runtime" style="font-size:1rem;color:var(--green)">--:--:--</span>
+      </div>
+    </div>
+
+    <!-- M3U Preview -->
+    <div class="preview-section">
+      <div class="section-header" style="padding:0 0 10px 0;border:none;background:none;font-size:0.65rem">
+        <div class="dot" style="width:6px;height:6px"></div> M3U PREVIEW
+      </div>
+      <div class="preview-box" id="m3u-preview"># drop files to see preview</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-left">
+    <span>DROP ZONE OPS // CLIENT-SIDE M3U BUILDER</span>
+    <span class="footer-clock" id="clock"></span>
+  </div>
+  <div class="footer-links">
+    <a class="footer-link highlight" href="https://schwwaaa.net" target="_blank" rel="noopener">🪂 schwwaaa</a>
+    <a class="footer-link" href="https://subcarrier.tv" target="_blank" rel="noopener">📡 subcarrier.tv</a>
+    <a class="footer-link" href="https://github.com/cyberboy666/obs_scheduler" target="_blank" rel="noopener">⚙ obs_scheduler</a>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- COMMERCIAL INJECTION PANEL -->
+<div class="injector-overlay" id="injector-overlay" onclick="closeInjector(event)"></div>
+<div class="injector-panel" id="injector-panel">
+
+  <div class="injector-header">
+    <div class="injector-title">💉 Commercial Injection</div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn btn-secondary" style="width:auto;padding:7px 14px;font-size:0.65rem;" onclick="document.getElementById('inj-import-input').click()">
+        📋 Import Template JSON
+      </button>
+      <input type="file" id="inj-import-input" accept=".json" style="display:none" onchange="importInjTemplate(event)">
+      <button class="injector-close" onclick="closeInjectorBtn()">✕ CLOSE</button>
+    </div>
+  </div>
+
+  <div class="injector-body">
+
+    <!-- COL 1: COMMERCIAL LIBRARY -->
+    <div class="inj-col">
+      <div class="inj-col-header">
+        <div class="dot" style="width:6px;height:6px;background:var(--cyan);box-shadow:0 0 6px var(--cyan)"></div>
+        Commercial Library
+      </div>
+      <div class="inj-col-body">
+
+        <!-- Library base path -->
+        <div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;">Library Base Path</div>
+          <input id="lib-base-path" type="text" placeholder="/path/to/commercials/"
+            style="width:100%;background:var(--dark3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.72rem;padding:8px 10px;outline:none;"
+            oninput="refreshJSON()"
+            onfocus="this.style.borderColor='var(--cyan)'"
+            onblur="this.style.borderColor='var(--border)'">
+        </div>
+
+        <!-- Add clip row -->
+        <div style="display:flex;gap:6px;">
+          <input id="lib-clip-path" type="text" placeholder="filename.mp4 or remote URL"
+            style="flex:1;min-width:0;background:var(--dark3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.7rem;padding:7px 9px;outline:none;"
+            onfocus="this.style.borderColor='var(--cyan)'"
+            onblur="this.style.borderColor='var(--border)'"
+            onkeydown="if(event.key==='Enter') addLibClip()">
+        </div>
+        <div style="display:flex;gap:6px;">
+          <input id="lib-clip-name" type="text" placeholder="display name"
+            style="flex:1;background:var(--dark3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.7rem;padding:7px 9px;outline:none;"
+            onfocus="this.style.borderColor='var(--cyan)'"
+            onblur="this.style.borderColor='var(--border)'"
+            onkeydown="if(event.key==='Enter') addLibClip()">
+          <input id="lib-clip-dur" type="text" placeholder="0:30"
+            style="width:55px;background:var(--dark3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.7rem;padding:7px 8px;outline:none;"
+            onfocus="this.style.borderColor='var(--cyan)'"
+            onblur="this.style.borderColor='var(--border)'">
+          <button class="btn btn-secondary" style="width:auto;padding:7px 10px;font-size:0.65rem;white-space:nowrap;" onclick="addLibClip()">+ ADD</button>
+        </div>
+
+        <!-- Library list -->
+        <div id="lib-list" style="display:flex;flex-direction:column;gap:4px;"></div>
+        <div id="lib-empty" style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#333344;text-align:center;padding:20px 0;letter-spacing:1px;">
+          NO CLIPS — ADD ABOVE
+        </div>
+
+      </div>
+    </div>
+
+    <!-- COL 2: INJECTION RULES -->
+    <div class="inj-col">
+      <div class="inj-col-header">
+        <div class="dot" style="width:6px;height:6px;background:var(--orange);box-shadow:0 0 6px var(--orange)"></div>
+        Injection Rules
+      </div>
+      <div class="inj-col-body">
+
+        <!-- Content playlist source -->
+        <div style="background:var(--dark3);border:1px solid var(--border);border-radius:3px;padding:10px;">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Content Source</div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <div id="inj-content-status" style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--green);flex:1;">
+              ✓ Reading from current playlist
+            </div>
+            <button class="btn btn-secondary" style="width:auto;padding:6px 10px;font-size:0.6rem;white-space:nowrap;" onclick="document.getElementById('inj-m3u-input').click()">
+              Import .M3U
+            </button>
+            <input type="file" id="inj-m3u-input" accept=".m3u,.m3u8,.json" style="display:none" onchange="importContentPlaylist(event)">
+          </div>
+          <div id="inj-content-count" style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#555566;margin-top:5px;"></div>
+        </div>
+
+        <!-- Default rule -->
+        <div class="rule-card is-default" id="default-rule-card">
+          <span class="rule-badge badge-default">Default Rule</span>
+          <div class="rule-row">
+            <span class="rule-label">Interval</span>
+            <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);">every</span>
+            <input class="rule-input" id="rule-interval" type="number" value="2" min="1" max="99" oninput="refreshJSON()">
+            <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);">content items</span>
+          </div>
+          <div class="rule-row">
+            <span class="rule-label">Ads / break</span>
+            <input class="rule-input" id="rule-min" type="number" value="1" min="1" max="10" oninput="refreshJSON()">
+            <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);">–</span>
+            <input class="rule-input" id="rule-max" type="number" value="2" min="1" max="10" oninput="refreshJSON()">
+          </div>
+          <div class="rule-row">
+            <span class="rule-label">Selection</span>
+            <select class="rule-select" id="rule-selection" onchange="refreshJSON()">
+              <option value="random">Random</option>
+              <option value="sequential">Sequential</option>
+              <option value="pool">Pool</option>
+            </select>
+          </div>
+          <div class="bumper-row">
+            <input type="checkbox" class="bumper-check" id="def-pre-check" onchange="refreshJSON()">
+            <span class="bumper-label">Pre</span>
+            <select class="bumper-select" id="def-pre-clip" onchange="refreshJSON()">
+              <option value="">— none —</option>
+            </select>
+            <input type="checkbox" class="bumper-check" id="def-post-check" onchange="refreshJSON()">
+            <span class="bumper-label">Post</span>
+            <select class="bumper-select" id="def-post-clip" onchange="refreshJSON()">
+              <option value="">— none —</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Override rules -->
+        <div id="overrides-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+
+        <button class="btn btn-secondary" style="width:100%;font-size:0.65rem;" onclick="addOverride()">
+          + Add Position Override
+        </button>
+
+      </div>
+    </div>
+
+    <!-- COL 3: JSON + PREVIEW -->
+    <div class="inj-col">
+      <div class="inj-col-header">
+        <div class="dot" style="width:6px;height:6px;background:var(--green);box-shadow:0 0 6px var(--green)"></div>
+        <span>JSON Template</span>
+        <button onclick="toggleJsonEdit()" id="json-edit-btn"
+          style="margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:1px;padding:3px 8px;background:var(--dark3);border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;text-transform:uppercase;">
+          Edit
+        </button>
+        <button onclick="downloadTemplate()"
+          style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:1px;padding:3px 8px;background:var(--dark3);border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;text-transform:uppercase;">
+          ↓ Save
+        </button>
+      </div>
+      <textarea id="json-preview" class="json-box" readonly oninput="onJsonEdit()"></textarea>
+
+      <!-- Merged preview -->
+      <div style="padding:10px 14px;border-top:1px solid var(--border);background:var(--dark2);">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Merged Preview</div>
+        <div id="merged-preview" class="content-preview" style="max-height:200px;overflow-y:auto;"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="injector-footer">
+    <div class="injector-status" id="inj-status">Ready — configure rules and generate</div>
+    <div class="inj-btn-row">
+      <button class="btn btn-secondary" style="width:auto;padding:10px 18px;" onclick="closeInjectorBtn()">Cancel</button>
+      <button class="btn" style="width:auto;padding:10px 20px;background:var(--cyan);color:var(--dark);font-family:'Russo One',sans-serif;letter-spacing:2px;border:none;" onclick="generateInjected()">
+        💉 INJECT &amp; UPDATE PLAYLIST
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT MODAL -->
+<div class="modal-overlay" id="about-modal">
+  <div class="about-modal">
+    <button class="modal-close" onclick="document.getElementById('about-modal').classList.remove('open')">&times;</button>
+    <h3>Drop Zone Ops</h3>
+    <div class="about-sub">A client-side M3U playlist builder for DIY broadcasters</div>
+
+    <p>Building an <code style="color:var(--orange);font-family:'Share Tech Mono',monospace">.m3u</code> playlist by hand is confusing and inaccessible to collaborators who aren't comfortable with file paths and formatting. Drop Zone Ops fixes that — it's a drag-and-drop playlist builder that outputs a clean, correctly formatted <code style="color:var(--orange);font-family:'Share Tech Mono',monospace">.m3u</code> file that works in both VLC and OBS's VLC source plugin.</p>
+
+    <p>It was built to support the DIY broadcast workflows behind <strong style="color:var(--orange)">schwwaaa</strong> and <strong style="color:var(--orange)">subcarrier.tv</strong> — community-run streaming channels that needed a simple way to assemble custom playlists with interstitial breaks, commercial bumpers, and mixed local/remote content, then hand them off to OBS.</p>
+
+    <p>No server. No install. No command line. Open the file in a browser and start building. Mix local file paths with remote URLs, tag your content by type, arrange your broadcast block exactly how you want it, then export.</p>
+
+    <div class="about-links">
+      <a class="about-link about-link-primary" href="https://schwwaaa.net" target="_blank" rel="noopener">🪂 schwwaaa.net</a>
+      <a class="about-link about-link-secondary" href="https://subcarrier.tv" target="_blank" rel="noopener">📡 subcarrier.tv</a>
+      <a class="about-link about-link-secondary" href="https://github.com/cyberboy666/obs_scheduler" target="_blank" rel="noopener">⚙ obs_scheduler (inspiration)</a>
+    </div>
+  </div>
+</div>
+
+<!-- ITEM EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <h3>Edit Item</h3>
+    <div class="form-row">
+      <label class="form-label">Display Name</label>
+      <input class="form-input" id="edit-name" type="text">
+    </div>
+    <div class="form-row">
+      <label class="form-label">File Path / URL</label>
+      <input class="form-input" id="edit-path" type="text">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Duration (e.g. 1:30 or 5:28, leave blank if unknown)</label>
+      <input class="form-input" id="edit-duration" type="text" placeholder="MM:SS or H:MM:SS">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Tag / Type</label>
+      <div class="tag-select-row" id="edit-tag-row">
+        <div class="tag-opt selected" data-val="content">Content</div>
+        <div class="tag-opt" data-val="commercial">Commercial</div>
+        <div class="tag-opt" data-val="bumper">Bumper</div>
+        <div class="tag-opt" data-val="interstitial">Interstitial</div>
+        <div class="tag-opt" data-val="other">Other</div>
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Group / Block</label>
+      <input class="form-input" id="edit-group" type="text" placeholder="e.g. block-1, act-2, ad-break">
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" style="width:auto" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" style="width:auto" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── STATE ──
+  let playlist = [];
+  let dragSrcIdx = null;
+  let editIdx = null;
+
+  // ── CLOCK ──
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {hour12: false}) + ' LOCAL';
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // ── DROPZONE ──
+  const dz = document.getElementById('dropzone');
+  const fileInput = document.getElementById('file-input');
+
+  dz.addEventListener('click', () => fileInput.click());
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.classList.remove('drag-over');
+    handleFiles(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+  function getBasePath() {
+    let bp = (document.getElementById('base-path').value || '').trim();
+    if (!bp) return '';
+    // Normalize: ensure trailing slash, handle both / and \
+    bp = bp.replace(/[/\\]+$/, ''); // strip trailing slashes
+    // Detect Windows path
+    const isWin = bp.match(/^[a-zA-Z]:\\/);
+    return bp + (isWin ? '\\' : '/');
+  }
+
+  function isRemoteUrl(path) {
+    return /^https?:\/\//i.test(path) || /^ftp:\/\//i.test(path);
+  }
+
+  function buildPath(filename) {
+    const bp = getBasePath();
+    return bp ? bp + filename : filename;
+  }
+
+  function onBasePathChange() {
+    const bp = getBasePath();
+    const status = document.getElementById('base-path-status');
+    if (bp) {
+      status.textContent = '✓ SET';
+      status.style.color = 'var(--green)';
+      document.getElementById('base-path').style.borderColor = 'var(--green)';
+    } else {
+      status.textContent = '';
+      document.getElementById('base-path').style.borderColor = 'var(--border)';
+    }
+  }
+
+  // Apply base path retroactively to all existing local items
+  function applyBasePathToAll() {
+    const bp = getBasePath();
+    if (!bp) { toast('Set a base path first'); return; }
+    let count = 0;
+    playlist.forEach(item => {
+      if (!isRemoteUrl(item.path)) {
+        // Strip any existing base path prefix if re-applying, then apply fresh
+        const filename = item.path.split(/[/\\]/).pop();
+        item.path = bp + filename;
+        count++;
+      }
+    });
+    render();
+    toast(`Base path applied to ${count} local item${count !== 1 ? 's' : ''}`, true);
+  }
+
+  function handleFiles(files) {
+    Array.from(files).forEach(file => {
+      const name = file.name.replace(/\.[^.]+$/, '');
+      const path = buildPath(file.name);
+      addItem({ name, path, duration: 0, tag: 'content', group: '', isLocal: true });
+    });
+  }
+
+  // ── ADD URL ──
+  function addUrl() {
+    const url = document.getElementById('url-input').value.trim();
+    const name = document.getElementById('url-name-input').value.trim();
+    if (!url) { toast('Paste a URL first', false); return; }
+    const autoName = name || url.split('/').pop().split('?')[0].replace(/\.[^.]+$/, '') || 'untitled';
+    addItem({ name: autoName, path: url, duration: 0, tag: 'content', group: '', isLocal: false });
+    document.getElementById('url-input').value = '';
+    document.getElementById('url-name-input').value = '';
+  }
+  document.getElementById('url-input').addEventListener('keydown', e => { if (e.key === 'Enter') addUrl(); });
+
+  // ── ADD ITEM ──
+  function addItem(item) {
+    playlist.push(item);
+    render();
+  }
+
+  // ── IMPORT CSV/JSON ──
+  function handleImport(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const text = ev.target.result;
+      try {
+        if (file.name.endsWith('.json')) {
+          const data = JSON.parse(text);
+          const arr = Array.isArray(data) ? data : data.playlist || data.items || [];
+          arr.forEach(item => addItem({
+            name: item.name || item.title || item.path?.split('/').pop() || 'untitled',
+            path: item.path || item.url || item.src || '',
+            duration: Number(item.duration) || 0,
+            tag: item.tag || item.type || item.category || 'content',
+            group: item.group || item.block || ''
+          }));
+          toast(`Imported ${arr.length} items from JSON`, true);
+        } else {
+          // CSV
+          const lines = text.trim().split('\n');
+          const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,'').toLowerCase());
+          const items = lines.slice(1).filter(l => l.trim());
+          items.forEach(line => {
+            const vals = parseCSVLine(line);
+            const obj = {};
+            headers.forEach((h, i) => obj[h] = (vals[i] || '').replace(/^"|"$/g, '').trim());
+            addItem({
+              name: obj.name || obj.title || obj.path?.split('/').pop() || 'untitled',
+              path: obj.path || obj.url || obj.src || '',
+              duration: Number(obj.duration) || 0,
+              tag: obj.tag || obj.type || obj.category || 'content',
+              group: obj.group || obj.block || ''
+            });
+          });
+          toast(`Imported ${items.length} items from CSV`, true);
+        }
+      } catch(err) {
+        toast('Import failed: ' + err.message, false);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }
+
+  function parseCSVLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { inQuotes = !inQuotes; }
+      else if (line[i] === ',' && !inQuotes) { result.push(current); current = ''; }
+      else { current += line[i]; }
+    }
+    result.push(current);
+    return result;
+  }
+
+  // ── RENDER ──
+  function render() {
+    const container = document.getElementById('playlist');
+    const emptyMsg = document.getElementById('empty-msg');
+
+    if (playlist.length === 0) {
+      container.innerHTML = '<div class="playlist-empty" id="empty-msg">🪂 &nbsp; NO FILES YET — DROP OR PASTE TO BEGIN</div>';
+      updateStats();
+      updatePreview();
+      return;
+    }
+    if (emptyMsg) emptyMsg.remove();
+
+    // Remove old items, keep only .playlist-item elements
+    container.querySelectorAll('.playlist-item').forEach(el => el.remove());
+
+    playlist.forEach((item, idx) => {
+      const el = document.createElement('div');
+      el.className = 'playlist-item';
+      el.draggable = true;
+      el.dataset.idx = idx;
+
+      const tagClass = `tag-${item.tag || 'content'}`;
+      const dur = item.duration > 0 ? formatDur(item.duration) : '--:--';
+      const pathDisplay = item.path.length > 48 ? '…' + item.path.slice(-45) : item.path;
+      const hasAbsPath = isRemoteUrl(item.path) || item.path.includes('/') || item.path.includes('\\');
+      const pathColor = isRemoteUrl(item.path) ? 'var(--cyan)' : hasAbsPath ? 'var(--green)' : 'var(--orange)';
+
+      el.innerHTML = `
+        <span class="item-num">${idx+1}</span>
+        <span class="item-handle" title="drag to reorder">⠿</span>
+        <div class="item-info">
+          <div class="item-name" onclick="openEdit(${idx})" title="click to edit">${escHtml(item.name)}</div>
+          <div class="item-meta" title="${escHtml(item.path)}" style="color:${pathColor}">${escHtml(pathDisplay)}${item.group ? ` · ${item.group}` : ''}</div>
+        </div>
+        <div class="item-tag ${tagClass}" onclick="cycleTag(${idx})" title="click to change tag">${item.tag || 'content'}</div>
+        <button class="item-del" onclick="removeItem(${idx})" title="remove">✕</button>
+      `;
+
+      el.addEventListener('dragstart', () => { dragSrcIdx = idx; el.classList.add('dragging'); });
+      el.addEventListener('dragend', () => el.classList.remove('dragging'));
+      el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-target'); });
+      el.addEventListener('dragleave', () => el.classList.remove('drag-target'));
+      el.addEventListener('drop', e => {
+        e.preventDefault();
+        el.classList.remove('drag-target');
+        if (dragSrcIdx !== null && dragSrcIdx !== idx) {
+          const moved = playlist.splice(dragSrcIdx, 1)[0];
+          playlist.splice(idx, 0, moved);
+          dragSrcIdx = null;
+          render();
+        }
+      });
+
+      container.appendChild(el);
+    });
+
+    updateStats();
+    updatePreview();
+    updatePill();
+  }
+
+  function updatePill() {
+    document.getElementById('item-count-pill').textContent = `${playlist.length} ITEM${playlist.length !== 1 ? 'S' : ''}`;
+    document.getElementById('list-count').textContent = playlist.length ? `— ${playlist.length} TRACKS` : '— EMPTY';
+  }
+
+  function updateStats() {
+    const tags = ['content','commercial','bumper','interstitial'];
+    document.getElementById('stat-total').textContent = playlist.length;
+    tags.forEach(t => {
+      document.getElementById(`stat-${t}`).textContent = playlist.filter(i => i.tag === t).length;
+    });
+    const totalSec = playlist.reduce((s, i) => s + (i.duration || 0), 0);
+    document.getElementById('stat-runtime').textContent = totalSec > 0 ? formatDur(totalSec) : '--:--:--';
+  }
+
+  function updatePreview() {
+    if (playlist.length === 0) {
+      document.getElementById('m3u-preview').innerHTML = '<span style="color:#333344"># drop files to see preview</span>';
+      return;
+    }
+    const noPath = playlist.filter(i => !isRemoteUrl(i.path) && !i.path.includes('/') && !i.path.includes('\\')).length;
+    let preview = '<span class="ext-header">#EXTM3U</span>\n';
+    if (noPath > 0) {
+      preview += `<span style="color:var(--orange)">## ⚠ ${noPath} local item(s) missing base path — set above</span>\n`;
+    }
+    const shown = playlist.slice(0, 6);
+    shown.forEach(item => {
+      const dur = item.duration || 0;
+      const grp = item.group ? ` group-title="${escHtml(item.group)}"` : '';
+      preview += `<span class="ext-inf">#EXTINF:${dur}${grp},${escHtml(item.name)}</span>\n`;
+      const pathCol = isRemoteUrl(item.path) ? 'var(--cyan)' : (item.path.includes('/') || item.path.includes('\\') ? 'var(--green)' : 'var(--orange)');
+      preview += `<span style="color:${pathCol}">${escHtml(item.path)}</span>\n`;
+    });
+    if (playlist.length > 6) {
+      preview += `<span style="color:#333344">... and ${playlist.length - 6} more items</span>`;
+    }
+    document.getElementById('m3u-preview').innerHTML = preview;
+  }
+
+  // ── REMOVE / CLEAR ──
+  function removeItem(idx) {
+    playlist.splice(idx, 1);
+    render();
+  }
+
+  function clearAll() {
+    if (playlist.length === 0) return;
+    if (confirm('Clear the entire playlist?')) {
+      playlist = [];
+      render();
+      toast('Playlist cleared');
+    }
+  }
+
+  // ── CYCLE TAG ──
+  const TAG_CYCLE = ['content', 'commercial', 'bumper', 'interstitial', 'other'];
+  function cycleTag(idx) {
+    const cur = TAG_CYCLE.indexOf(playlist[idx].tag || 'content');
+    playlist[idx].tag = TAG_CYCLE[(cur + 1) % TAG_CYCLE.length];
+    render();
+  }
+
+  // ── SORT BY TAG ──
+  const TAG_ORDER = { content: 0, commercial: 1, bumper: 2, interstitial: 3, other: 4 };
+  function sortByTag() {
+    playlist.sort((a, b) => (TAG_ORDER[a.tag] || 0) - (TAG_ORDER[b.tag] || 0));
+    render();
+    toast('Sorted by tag');
+  }
+
+  // ── EDIT MODAL ──
+  function openEdit(idx) {
+    editIdx = idx;
+    const item = playlist[idx];
+    document.getElementById('edit-name').value = item.name || '';
+    document.getElementById('edit-path').value = item.path || '';
+    document.getElementById('edit-duration').value = item.duration > 0 ? formatDur(item.duration) : '';
+    document.getElementById('edit-group').value = item.group || '';
+
+    document.querySelectorAll('#edit-tag-row .tag-opt').forEach(opt => {
+      opt.classList.toggle('selected', opt.dataset.val === (item.tag || 'content'));
+    });
+    document.querySelectorAll('#edit-tag-row .tag-opt').forEach(opt => {
+      opt.onclick = () => {
+        document.querySelectorAll('#edit-tag-row .tag-opt').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+      };
+    });
+
+    document.getElementById('edit-modal').classList.add('open');
+    document.getElementById('edit-name').focus();
+  }
+
+  function closeModal() {
+    document.getElementById('edit-modal').classList.remove('open');
+    editIdx = null;
+  }
+
+  function saveEdit() {
+    if (editIdx === null) return;
+    const selTag = document.querySelector('#edit-tag-row .tag-opt.selected');
+    playlist[editIdx] = {
+      ...playlist[editIdx],
+      name: document.getElementById('edit-name').value.trim() || playlist[editIdx].name,
+      path: document.getElementById('edit-path').value.trim() || playlist[editIdx].path,
+      duration: parseDur(document.getElementById('edit-duration').value),
+      tag: selTag ? selTag.dataset.val : playlist[editIdx].tag,
+      group: document.getElementById('edit-group').value.trim()
+    };
+    closeModal();
+    render();
+    toast('Item updated', true);
+  }
+
+  // close modals on overlay click
+  document.getElementById('edit-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+  document.getElementById('about-modal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeModal();
+      document.getElementById('about-modal').classList.remove('open');
+    }
+  });
+
+  // ── EXPORT M3U ──
+  function exportM3U() {
+    if (playlist.length === 0) { toast('Add some files first!'); return; }
+
+    const noPath = playlist.filter(i => !isRemoteUrl(i.path) && !i.path.includes('/') && !i.path.includes('\\')).length;
+    if (noPath > 0) {
+      if (!confirm(`⚠ ${noPath} local item(s) have no base path set — they'll export as filename only and may not work in OBS.\n\nExport anyway?`)) return;
+    }
+
+    let m3u = '#EXTM3U\n';
+    playlist.forEach(item => {
+      const dur = item.duration || 0;
+      const grpAttr = item.group ? ` group-title="${item.group}"` : '';
+      const tagAttr = item.tag ? ` tvg-type="${item.tag}"` : '';
+      m3u += `#EXTINF:${dur}${grpAttr}${tagAttr},${item.name}\n`;
+      m3u += `${item.path}\n`;
+    });
+
+    const playlistName = (document.getElementById('playlist-name').value.trim() || 'playlist').replace(/[^a-zA-Z0-9_\-]/g, '_');
+    const blob = new Blob([m3u.trimEnd()], { type: 'application/x-mpegurl' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${playlistName}.m3u`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast(`Exported ${playlist.length} items → .m3u`, true);
+  }
+
+  // ── UTILS ──
+  function formatDur(sec) {
+    if (!sec || sec <= 0) return '--:--';
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = Math.floor(sec % 60);
+    if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    return `${m}:${String(s).padStart(2,'0')}`;
+  }
+
+  // Parse "1:30", "5:28", "1:02:45" → seconds
+  function parseDur(str) {
+    if (!str || str.trim() === '') return 0;
+    const parts = String(str).trim().split(':').map(Number);
+    if (parts.some(isNaN)) return 0;
+    if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
+    if (parts.length === 2) return parts[0]*60 + parts[1];
+    return parts[0]; // just seconds fallback
+  }
+
+  function escHtml(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function toast(msg, success = false) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast show' + (success ? ' success' : '');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+
+  // ══════════════════════════════════════
+  //  COMMERCIAL INJECTION ENGINE
+  // ══════════════════════════════════════
+
+  let injLibrary = [];       // commercial clips
+  let injOverrides = [];     // position override rules
+  let injContentSource = null; // null = use live playlist
+  let jsonEditMode = false;
+
+  // ── OPEN / CLOSE ──
+  function openInjector() {
+    syncContentSource();
+    document.getElementById('injector-overlay').classList.add('open');
+    document.getElementById('injector-panel').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    refreshJSON();
+  }
+
+  function closeInjectorBtn() {
+    document.getElementById('injector-overlay').classList.remove('open');
+    document.getElementById('injector-panel').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function closeInjector(e) {
+    if (e.target === document.getElementById('injector-overlay')) closeInjectorBtn();
+  }
+
+  // ── SYNC CONTENT FROM LIVE PLAYLIST ──
+  function syncContentSource() {
+    injContentSource = null;
+    const count = playlist.filter(i => i.tag === 'content').length;
+    document.getElementById('inj-content-status').textContent = '✓ Reading from current playlist';
+    document.getElementById('inj-content-status').style.color = 'var(--green)';
+    document.getElementById('inj-content-count').textContent =
+      playlist.length + ' items (' + count + ' content)';
+  }
+
+  // ── IMPORT CONTENT PLAYLIST (.m3u or .json) ──
+  function importContentPlaylist(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const text = ev.target.result;
+      let items = [];
+      if (file.name.endsWith('.json')) {
+        try {
+          const data = JSON.parse(text);
+          items = (Array.isArray(data) ? data : data.playlist || data.items || []).map(i => ({
+            name: i.name || i.title || i.path?.split('/').pop() || 'untitled',
+            path: i.path || i.url || '',
+            duration: parseDur(String(i.duration || '0')),
+            tag: i.tag || 'content', group: i.group || ''
+          }));
+        } catch(err) { toast('JSON parse error: ' + err.message); return; }
+      } else {
+        // Parse .m3u
+        const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+        let curName = '';
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].startsWith('#EXTINF')) {
+            const match = lines[i].match(/,(.+)$/);
+            curName = match ? match[1] : 'untitled';
+          } else if (!lines[i].startsWith('#')) {
+            items.push({ name: curName || lines[i].split('/').pop(), path: lines[i], duration: 0, tag: 'content', group: '' });
+            curName = '';
+          }
+        }
+      }
+      injContentSource = items;
+      const count = items.filter(i => i.tag === 'content').length;
+      document.getElementById('inj-content-status').textContent = '✓ Imported: ' + file.name;
+      document.getElementById('inj-content-status').style.color = 'var(--cyan)';
+      document.getElementById('inj-content-count').textContent = items.length + ' items (' + count + ' content)';
+      refreshJSON();
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }
+
+  // ── IMPORT TEMPLATE JSON ──
+  function importInjTemplate(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const t = JSON.parse(ev.target.result);
+        // Load library
+        injLibrary = [];
+        if (t.commercial_library) {
+          if (t.commercial_library.source) document.getElementById('lib-base-path').value = t.commercial_library.source;
+          if (t.commercial_library.files) {
+            t.commercial_library.files.forEach(f => injLibrary.push({
+              name: f.name || f.path, path: f.path, duration: parseDur(String(f.duration || '0'))
+            }));
+          }
+        }
+        // Load default rule
+        if (t.breaks) {
+          document.getElementById('rule-interval').value = t.breaks.default_interval || 2;
+          document.getElementById('rule-min').value = t.breaks.min_ads || 1;
+          document.getElementById('rule-max').value = t.breaks.max_ads || 2;
+          document.getElementById('rule-selection').value = t.breaks.selection || 'random';
+          // default bumpers
+          const db = t.breaks.default_bumpers || {};
+          document.getElementById('def-pre-check').checked = !!db.pre;
+          document.getElementById('def-post-check').checked = !!db.post;
+          // Load overrides
+          injOverrides = (t.breaks.overrides || []).map(o => ({
+            after_item: o.after_item, min_ads: o.min_ads || 1, max_ads: o.max_ads || 1,
+            selection: o.selection || 'random', specific: o.clips || [],
+            pre_bumper: o.bumpers?.pre || '', post_bumper: o.bumpers?.post || '',
+            use_pre: !!o.bumpers?.pre, use_post: !!o.bumpers?.post
+          }));
+        }
+        renderLibrary();
+        renderOverrides();
+        refreshJSON();
+        toast('Template loaded', true);
+      } catch(err) { toast('Template parse error: ' + err.message); }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }
+
+  // ── LIBRARY ──
+  function addLibClip() {
+    const path = document.getElementById('lib-clip-path').value.trim();
+    const name = document.getElementById('lib-clip-name').value.trim();
+    const dur  = document.getElementById('lib-clip-dur').value.trim();
+    if (!path) { toast('Enter a path or URL'); return; }
+    injLibrary.push({ name: name || path.split('/').pop().replace(/\.\w+$/, ''), path, duration: parseDur(dur) });
+    document.getElementById('lib-clip-path').value = '';
+    document.getElementById('lib-clip-name').value = '';
+    document.getElementById('lib-clip-dur').value = '';
+    renderLibrary();
+    refreshJSON();
+  }
+
+  function removeLibClip(idx) {
+    injLibrary.splice(idx, 1);
+    renderLibrary();
+    refreshJSON();
+  }
+
+  function renderLibrary() {
+    const list = document.getElementById('lib-list');
+    const empty = document.getElementById('lib-empty');
+    list.innerHTML = '';
+    empty.style.display = injLibrary.length ? 'none' : 'block';
+    injLibrary.forEach((clip, idx) => {
+      const el = document.createElement('div');
+      el.className = 'lib-item';
+      el.innerHTML = `
+        <div class="lib-item-name" title="${escHtml(clip.path)}">${escHtml(clip.name)}</div>
+        <div class="lib-item-dur">${clip.duration > 0 ? formatDur(clip.duration) : '--:--'}</div>
+        <button class="lib-item-del" onclick="removeLibClip(${idx})">✕</button>
+      `;
+      list.appendChild(el);
+    });
+    updateBumperSelects();
+  }
+
+  function updateBumperSelects() {
+    const selects = document.querySelectorAll('.bumper-select, #def-pre-clip, #def-post-clip');
+    selects.forEach(sel => {
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">— none —</option>';
+      injLibrary.forEach(clip => {
+        const opt = document.createElement('option');
+        opt.value = clip.path;
+        opt.textContent = clip.name;
+        sel.appendChild(opt);
+      });
+      sel.value = cur;
+    });
+  }
+
+  // ── OVERRIDES ──
+  function addOverride() {
+    injOverrides.push({ after_item: 1, min_ads: 1, max_ads: 1, selection: 'random', specific: [], use_pre: false, pre_bumper: '', use_post: false, post_bumper: '' });
+    renderOverrides();
+    refreshJSON();
+  }
+
+  function removeOverride(idx) {
+    injOverrides.splice(idx, 1);
+    renderOverrides();
+    refreshJSON();
+  }
+
+  function renderOverrides() {
+    const container = document.getElementById('overrides-list');
+    container.innerHTML = '';
+    injOverrides.forEach((ov, idx) => {
+      const el = document.createElement('div');
+      el.className = 'rule-card is-override';
+      const libOptions = injLibrary.map(c => `<option value="${escHtml(c.path)}">${escHtml(c.name)}</option>`).join('');
+      el.innerHTML = `
+        <span class="rule-badge badge-override">Override #${idx+1}</span>
+        <button class="rule-del" onclick="removeOverride(${idx})">✕</button>
+        <div class="rule-row">
+          <span class="rule-label">After item</span>
+          <input class="rule-input" type="number" value="${ov.after_item}" min="1"
+            oninput="injOverrides[${idx}].after_item=+this.value;refreshJSON()">
+        </div>
+        <div class="rule-row">
+          <span class="rule-label">Ads</span>
+          <input class="rule-input" type="number" value="${ov.min_ads}" min="1" max="10"
+            oninput="injOverrides[${idx}].min_ads=+this.value;refreshJSON()">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);">–</span>
+          <input class="rule-input" type="number" value="${ov.max_ads}" min="1" max="10"
+            oninput="injOverrides[${idx}].max_ads=+this.value;refreshJSON()">
+        </div>
+        <div class="rule-row">
+          <span class="rule-label">Selection</span>
+          <select class="rule-select" onchange="injOverrides[${idx}].selection=this.value;refreshJSON()">
+            <option value="random" ${ov.selection==='random'?'selected':''}>Random</option>
+            <option value="sequential" ${ov.selection==='sequential'?'selected':''}>Sequential</option>
+            <option value="specific" ${ov.selection==='specific'?'selected':''}>Specific clips</option>
+          </select>
+        </div>
+        <div class="bumper-row">
+          <input type="checkbox" class="bumper-check" ${ov.use_pre?'checked':''}
+            onchange="injOverrides[${idx}].use_pre=this.checked;refreshJSON()">
+          <span class="bumper-label">Pre</span>
+          <select class="bumper-select" onchange="injOverrides[${idx}].pre_bumper=this.value;refreshJSON()">
+            <option value="">— none —</option>${libOptions}
+          </select>
+          <input type="checkbox" class="bumper-check" ${ov.use_post?'checked':''}
+            onchange="injOverrides[${idx}].use_post=this.checked;refreshJSON()">
+          <span class="bumper-label">Post</span>
+          <select class="bumper-select" onchange="injOverrides[${idx}].post_bumper=this.value;refreshJSON()">
+            <option value="">— none —</option>${libOptions}
+          </select>
+        </div>
+      `;
+      container.appendChild(el);
+    });
+  }
+
+  // ── BUILD TEMPLATE OBJECT ──
+  function buildTemplate() {
+    const t = {
+      name: document.getElementById('playlist-name').value.trim() || 'playlist',
+      commercial_library: {
+        source: document.getElementById('lib-base-path').value.trim(),
+        files: injLibrary.map(c => ({ name: c.name, path: c.path, duration: formatDur(c.duration) }))
+      },
+      breaks: {
+        default_interval: parseInt(document.getElementById('rule-interval').value) || 2,
+        min_ads: parseInt(document.getElementById('rule-min').value) || 1,
+        max_ads: parseInt(document.getElementById('rule-max').value) || 2,
+        selection: document.getElementById('rule-selection').value,
+        default_bumpers: {},
+        overrides: injOverrides.map(o => {
+          const obj = { after_item: o.after_item, min_ads: o.min_ads, max_ads: o.max_ads, selection: o.selection };
+          if (o.use_pre || o.use_post) obj.bumpers = { pre: o.use_pre ? o.pre_bumper : '', post: o.use_post ? o.post_bumper : '' };
+          if (o.selection === 'specific' && o.specific.length) obj.clips = o.specific;
+          return obj;
+        })
+      }
+    };
+    // default bumpers
+    const preCheck  = document.getElementById('def-pre-check').checked;
+    const postCheck = document.getElementById('def-post-check').checked;
+    if (preCheck || postCheck) {
+      t.breaks.default_bumpers = {
+        pre:  preCheck  ? document.getElementById('def-pre-clip').value  : '',
+        post: postCheck ? document.getElementById('def-post-clip').value : ''
+      };
+    }
+    return t;
+  }
+
+  // ── JSON EDIT MODE ──
+  function toggleJsonEdit() {
+    jsonEditMode = !jsonEditMode;
+    const ta = document.getElementById('json-preview');
+    const btn = document.getElementById('json-edit-btn');
+    if (jsonEditMode) {
+      ta.removeAttribute('readonly');
+      ta.style.color = '#ffc800';
+      btn.textContent = 'Lock';
+      btn.style.borderColor = '#ffc800';
+      btn.style.color = '#ffc800';
+    } else {
+      ta.setAttribute('readonly', true);
+      ta.style.color = '#7ec8e3';
+      btn.textContent = 'Edit';
+      btn.style.borderColor = 'var(--border)';
+      btn.style.color = 'var(--text-dim)';
+      // parse back
+      try {
+        JSON.parse(ta.value);
+        toast('JSON locked', true);
+      } catch(e) { toast('Invalid JSON — fix before locking'); jsonEditMode = true; ta.removeAttribute('readonly'); }
+    }
+  }
+
+  function onJsonEdit() { /* live editing — no auto-parse to avoid disruption */ }
+
+  // ── REFRESH JSON PREVIEW ──
+  function refreshJSON() {
+    if (jsonEditMode) return; // don't overwrite manual edits
+    const t = buildTemplate();
+    document.getElementById('json-preview').value = JSON.stringify(t, null, 2);
+    renderMergedPreview(t);
+  }
+
+  function downloadTemplate() {
+    const json = document.getElementById('json-preview').value;
+    const name = (document.getElementById('playlist-name').value.trim() || 'template').replace(/[^a-zA-Z0-9_-]/g,'_');
+    const blob = new Blob([json], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name + '-injection-template.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Template saved', true);
+  }
+
+  // ── MERGED PREVIEW ──
+  function renderMergedPreview(t) {
+    const merged = buildMergedPlaylist(t);
+    const container = document.getElementById('merged-preview');
+    container.innerHTML = '';
+    merged.slice(0, 30).forEach((item, idx) => {
+      const el = document.createElement('div');
+      const cls = item.tag === 'commercial' ? 'cp-commercial' : item.tag === 'bumper' ? 'cp-bumper' : 'cp-content';
+      el.className = 'cp-item ' + cls;
+      el.innerHTML = `<span class="cp-num">${idx+1}</span> ${escHtml(item.name)}`;
+      container.appendChild(el);
+    });
+    if (merged.length > 30) {
+      const el = document.createElement('div');
+      el.style.cssText = 'font-family:Share Tech Mono,monospace;font-size:0.6rem;color:#333344;padding:4px 8px;';
+      el.textContent = '... and ' + (merged.length - 30) + ' more items';
+      container.appendChild(el);
+    }
+    document.getElementById('inj-status').textContent =
+      'Preview: ' + merged.length + ' total items (' +
+      merged.filter(i=>i.tag==='content').length + ' content, ' +
+      merged.filter(i=>i.tag==='commercial').length + ' commercial, ' +
+      merged.filter(i=>i.tag==='bumper').length + ' bumper)';
+  }
+
+  // ── THE INJECTION ENGINE ──
+  function buildMergedPlaylist(t) {
+    const source = injContentSource || playlist;
+    const contentItems = source.filter(i => i.tag === 'content' || !i.tag);
+    if (!contentItems.length || !injLibrary.length) return source.slice();
+
+    const interval   = t.breaks.default_interval || 2;
+    const minAds     = t.breaks.min_ads || 1;
+    const maxAds     = t.breaks.max_ads || 2;
+    const selection  = t.breaks.selection || 'random';
+    const defBumpers = t.breaks.default_bumpers || {};
+    const overrides  = t.breaks.overrides || [];
+
+    const merged = [];
+    let seqIdx = 0; // for sequential selection
+
+    function pickAds(rule, count) {
+      const sel = rule.selection || selection;
+      const ads = [];
+      for (let i = 0; i < count; i++) {
+        if (sel === 'sequential') {
+          ads.push(injLibrary[seqIdx % injLibrary.length]);
+          seqIdx++;
+        } else if (sel === 'specific' && rule.clips && rule.clips.length) {
+          ads.push(injLibrary.find(c => rule.clips.includes(c.path)) || injLibrary[0]);
+        } else {
+          ads.push(injLibrary[Math.floor(Math.random() * injLibrary.length)]);
+        }
+      }
+      return ads;
+    }
+
+    function makeAdItem(clip, tag) {
+      const bp = document.getElementById('lib-base-path').value.trim();
+      const isRemote = /^https?:\/\//i.test(clip.path);
+      const resolvedPath = (!isRemote && bp) ? bp.replace(/[\/]+$/, '') + '/' + clip.path : clip.path;
+      return { name: clip.name, path: resolvedPath, duration: clip.duration, tag: tag || 'commercial', group: 'injected' };
+    }
+
+    contentItems.forEach((item, idx) => {
+      merged.push(item);
+      const position = idx + 1; // 1-based
+      // check if a break fires here
+      const override = overrides.find(o => o.after_item === position);
+      const isBreak = override || (position % interval === 0 && idx < contentItems.length - 1);
+      if (!isBreak) return;
+
+      const rule = override || { min_ads: minAds, max_ads: maxAds, selection };
+      const bumpers = override?.bumpers || defBumpers;
+      const count = rule.min_ads === rule.max_ads ? rule.min_ads :
+        Math.floor(Math.random() * (rule.max_ads - rule.min_ads + 1)) + rule.min_ads;
+
+      // pre-bumper
+      if (bumpers.pre) {
+        const preClip = injLibrary.find(c => c.path === bumpers.pre);
+        if (preClip) merged.push(makeAdItem(preClip, 'bumper'));
+      }
+      // ads
+      pickAds(rule, count).forEach(ad => merged.push(makeAdItem(ad)));
+      // post-bumper
+      if (bumpers.post) {
+        const postClip = injLibrary.find(c => c.path === bumpers.post);
+        if (postClip) merged.push(makeAdItem(postClip, 'bumper'));
+      }
+    });
+
+    return merged;
+  }
+
+  // ── GENERATE — UPDATE PLAYLIST IN PLACE ──
+  function generateInjected() {
+    if (injLibrary.length === 0) { toast('Add clips to your commercial library first'); return; }
+    const source = injContentSource || playlist;
+    if (source.length === 0) { toast('No content playlist loaded'); return; }
+
+    let t;
+    if (jsonEditMode) {
+      try { t = JSON.parse(document.getElementById('json-preview').value); }
+      catch(e) { toast('Fix JSON errors before generating'); return; }
+    } else {
+      t = buildTemplate();
+    }
+
+    const merged = buildMergedPlaylist(t);
+    if (!merged.length) { toast('Nothing to generate'); return; }
+
+    playlist = merged;
+    render();
+    closeInjectorBtn();
+    toast('Playlist updated — ' + merged.length + ' items injected', true);
+  }
+
+  // ── INIT ──
+  render();
+</script>
+</body>
+</html>
