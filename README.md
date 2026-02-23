@@ -133,6 +133,11 @@ Template files for both formats are included in the repo: `playlist-template.csv
 
 NEED IMAGE
 
+<p align="left">
+  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-exportnamedm3u.png?raw=true
+"/>  
+</p>
+
 Type a name for your playlist in the **Playlist Name** field (e.g. `saturday-night-block`). Then click **Export .M3U Playlist** — the file downloads directly to your machine as `saturday-night-block.m3u`.
 
 The exported file is compatible with both **VLC** and **OBS VLC Source**.
