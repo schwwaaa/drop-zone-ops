@@ -570,25 +570,444 @@
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--orange-dim); }
 
-  /* ── FOOTER ── */
-  .footer {
-    padding: 10px 20px;
+  /* ── ABOUT BUTTON ── */
+  .about-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 14px;
+    padding: 8px 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .about-btn:hover {
+    border-color: var(--orange);
+    color: var(--text);
+    background: rgba(255,69,0,0.08);
+  }
+  .about-btn::before { content: '?'; font-family: 'Russo One', sans-serif; color: var(--orange); }
+
+  /* ── ABOUT MODAL ── */
+  .about-modal {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--orange);
+    border-radius: 4px;
+    padding: 32px;
+    width: 580px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .about-modal h3 {
+    font-family: 'Russo One', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    color: var(--orange);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .about-modal .about-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .about-modal p {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem;
+    color: var(--text);
+    line-height: 1.7;
+    margin-bottom: 14px;
+  }
+  .about-modal p::before { content: none; }
+  .about-modal .about-links {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .about-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-decoration: none;
+    border-radius: 3px;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .about-link-primary {
+    background: var(--orange);
+    color: #fff;
+  }
+  .about-link-primary:hover { background: var(--orange-dim); transform: translateY(-1px); }
+  .about-link-secondary {
+    background: var(--dark3);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .about-link-secondary:hover { border-color: var(--orange); color: var(--text); }
+
+
+  /* ══════════════════════════════════════
+     COMMERCIAL INJECTION PANEL
+  ══════════════════════════════════════ */
+  .injector-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 5000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+  .injector-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .injector-panel {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: min(1100px, 100vw);
+    background: var(--dark);
+    border-left: 2px solid var(--cyan);
+    z-index: 5001;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    transform: translateX(100%);
+    transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: -20px 0 60px rgba(0,0,0,0.8);
+  }
+  .injector-panel.open { transform: translateX(0); }
+
+  .injector-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: var(--dark2);
+    border-bottom: 2px solid var(--border);
+  }
+  .injector-title {
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    text-transform: uppercase;
+  }
+  .injector-close {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    transition: all 0.15s;
+  }
+  .injector-close:hover { border-color: var(--orange); color: var(--orange); }
+
+  .injector-body {
+    display: grid;
+    grid-template-columns: 280px 1fr 300px;
+    overflow: hidden;
+  }
+
+  .inj-col {
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .inj-col:last-child { border-right: none; }
+
+  .inj-col-header {
+    padding: 12px 16px;
+    background: var(--dark2);
+    border-bottom: 1px solid var(--border);
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    color: var(--orange);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .inj-col-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Library items */
+  .lib-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    transition: border-color 0.15s;
+  }
+  .lib-item:hover { border-color: var(--cyan); }
+  .lib-item-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .lib-item-dur {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--cyan);
+    white-space: nowrap;
+  }
+  .lib-item-del {
+    background: none; border: none; color: #333344;
+    cursor: pointer; font-size: 0.9rem; padding: 2px 4px;
+    transition: color 0.15s; flex-shrink: 0;
+  }
+  .lib-item-del:hover { color: #ff3333; }
+
+  /* Rules */
+  .rule-card {
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px;
+    position: relative;
+  }
+  .rule-card.is-default { border-color: var(--orange); }
+  .rule-card.is-override { border-color: #ffc800; }
+  .rule-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+  .badge-default { background: rgba(255,69,0,0.15); color: var(--orange); border: 1px solid rgba(255,69,0,0.3); }
+  .badge-override { background: rgba(255,200,0,0.1); color: #ffc800; border: 1px solid rgba(255,200,0,0.3); }
+  .rule-del {
+    position: absolute; top: 8px; right: 8px;
+    background: none; border: none; color: #333344;
+    cursor: pointer; font-size: 0.9rem;
+    transition: color 0.15s;
+  }
+  .rule-del:hover { color: #ff3333; }
+  .rule-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 7px;
+    flex-wrap: wrap;
+  }
+  .rule-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    white-space: nowrap;
+    text-transform: uppercase;
+    min-width: 80px;
+  }
+  .rule-input {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    padding: 5px 8px;
+    outline: none;
+    width: 60px;
+    transition: border-color 0.15s;
+  }
+  .rule-input:focus { border-color: var(--orange); }
+  .rule-select {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    padding: 5px 8px;
+    outline: none;
+    flex: 1;
+    min-width: 0;
+    transition: border-color 0.15s;
+  }
+  .rule-select:focus { border-color: var(--orange); }
+  .rule-select option { background: var(--dark3); }
+
+  /* Bumper row */
+  .bumper-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    padding-top: 7px;
+    border-top: 1px solid var(--border);
+  }
+  .bumper-check {
+    accent-color: var(--cyan);
+    width: 13px; height: 13px;
+    cursor: pointer;
+  }
+  .bumper-select {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    padding: 4px 6px;
+    outline: none;
+    flex: 1;
+    min-width: 0;
+  }
+  .bumper-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--cyan);
+    white-space: nowrap;
+    text-transform: uppercase;
+  }
+
+  /* JSON preview */
+  .json-box {
+    flex: 1;
+    background: var(--dark);
+    border: none;
+    border-radius: 0;
+    color: #7ec8e3;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    line-height: 1.6;
+    padding: 14px;
+    resize: none;
+    outline: none;
+    overflow-y: auto;
+    white-space: pre;
+  }
+  .json-box:focus { outline: none; }
+
+  /* Content preview list */
+  .content-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .cp-item {
+    padding: 5px 8px;
+    border-radius: 2px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cp-content { background: rgba(0,255,204,0.05); color: var(--cyan); border-left: 2px solid var(--cyan); }
+  .cp-commercial { background: rgba(255,69,0,0.08); color: var(--orange); border-left: 2px solid var(--orange); }
+  .cp-bumper { background: rgba(57,255,20,0.05); color: var(--green); border-left: 2px solid var(--green); }
+  .cp-num { color: #333344; min-width: 20px; }
+
+  /* Injector footer */
+  .injector-footer {
+    padding: 14px 24px;
+    background: var(--dark2);
     border-top: 2px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
+  }
+  .injector-status {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+  .inj-btn-row { display: flex; gap: 8px; }
+
+  /* ── FOOTER ── */
+  .footer {
+    padding: 20px 40px;
+    border-top: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
     background: var(--dark2);
+    flex-wrap: wrap;
+  }
+  .footer-left {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.6rem;
     color: #333344;
     letter-spacing: 2px;
+    line-height: 1.8;
   }
-  .footer-clock { color: var(--text-dim); }
+  .footer-clock { color: var(--text-dim); display: block; }
+  .footer-links {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .footer-link {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    text-decoration: none;
+    padding: 7px 14px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    transition: all 0.15s;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .footer-link:hover { border-color: var(--orange); color: var(--orange); }
+  .footer-link.highlight { border-color: var(--orange-dim); color: var(--orange); }
+  .footer-link.highlight:hover { background: var(--orange); color: #fff; }
 
   /* ── Responsive ── */
   @media (max-width: 768px) {
     .app { grid-template-columns: 1fr; }
     .left-panel { border-right: none; border-bottom: 2px solid var(--border); }
+    .footer { justify-content: center; text-align: center; }
   }
 </style>
 </head>
@@ -604,6 +1023,9 @@
       <div class="status-pill">CLIENT-SIDE</div>
       <div class="status-pill" id="item-count-pill">0 ITEMS</div>
     </div>
+    <button class="about-btn" onclick="document.getElementById('about-modal').classList.add('open')">
+      What is this?
+    </button>
   </div>
 </div>
 
@@ -698,6 +1120,11 @@
         <span class="btn-icon">✕</span> Clear Playlist
       </button>
       <input type="file" id="import-input" accept=".csv,.json" style="display:none" onchange="handleImport(event)">
+      <div style="border-top:1px solid var(--border);margin-top:4px;padding-top:12px;">
+        <button class="btn" style="background:linear-gradient(135deg,#0d1b2a,#1a2744);border:1px solid var(--cyan);color:var(--cyan);letter-spacing:2px;" onclick="openInjector()">
+          <span class="btn-icon">💉</span> Commercial Injection
+        </button>
+      </div>
     </div>
 
     <!-- Import Format Info -->
@@ -757,13 +1184,211 @@
 
 <!-- FOOTER -->
 <div class="footer">
-  <span>DROP ZONE OPS // CLIENT-SIDE M3U BUILDER</span>
-  <span class="footer-clock" id="clock"></span>
-  <span>schwwaaa.net // subcarrier.tv</span>
+  <div class="footer-left">
+    <span>DROP ZONE OPS // CLIENT-SIDE M3U BUILDER</span>
+    <span class="footer-clock" id="clock"></span>
+  </div>
+  <div class="footer-links">
+    <a class="footer-link highlight" href="https://schwwaaa.net" target="_blank" rel="noopener">🪂 schwwaaa</a>
+    <a class="footer-link" href="https://subcarrier.tv" target="_blank" rel="noopener">📡 subcarrier.tv</a>
+    <a class="footer-link" href="https://github.com/cyberboy666/obs_scheduler" target="_blank" rel="noopener">⚙ obs_scheduler</a>
+  </div>
 </div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+
+<!-- COMMERCIAL INJECTION PANEL -->
+<div class="injector-overlay" id="injector-overlay" onclick="closeInjector(event)"></div>
+<div class="injector-panel" id="injector-panel">
+
+  <div class="injector-header">
+    <div class="injector-title">💉 Commercial Injection</div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="btn btn-secondary" style="width:auto;padding:7px 14px;font-size:0.65rem;" onclick="document.getElementById('inj-import-input').click()">
+        📋 Import Template JSON
+      </button>
+      <input type="file" id="inj-import-input" accept=".json" style="display:none" onchange="importInjTemplate(event)">
+      <button class="injector-close" onclick="closeInjectorBtn()">✕ CLOSE</button>
+    </div>
+  </div>
+
+  <div class="injector-body">
+
+    <!-- COL 1: COMMERCIAL LIBRARY -->
+    <div class="inj-col">
+      <div class="inj-col-header">
+        <div class="dot" style="width:6px;height:6px;background:var(--cyan);box-shadow:0 0 6px var(--cyan)"></div>
+        Commercial Library
+      </div>
+      <div class="inj-col-body">
+
+        <!-- Library base path -->
+        <div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;">Library Base Path</div>
+          <input id="lib-base-path" type="text" placeholder="/path/to/commercials/"
+            style="width:100%;background:var(--dark3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.72rem;padding:8px 10px;outline:none;"
+            oninput="refreshJSON()"
+            onfocus="this.style.borderColor='var(--cyan)'"
+            onblur="this.style.borderColor='var(--border)'">
+        </div>
+
+        <!-- Add clip row -->
+        <div style="display:flex;gap:6px;">
+          <input id="lib-clip-path" type="text" placeholder="filename.mp4 or remote URL"
+            style="flex:1;min-width:0;background:var(--dark3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.7rem;padding:7px 9px;outline:none;"
+            onfocus="this.style.borderColor='var(--cyan)'"
+            onblur="this.style.borderColor='var(--border)'"
+            onkeydown="if(event.key==='Enter') addLibClip()">
+        </div>
+        <div style="display:flex;gap:6px;">
+          <input id="lib-clip-name" type="text" placeholder="display name"
+            style="flex:1;background:var(--dark3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.7rem;padding:7px 9px;outline:none;"
+            onfocus="this.style.borderColor='var(--cyan)'"
+            onblur="this.style.borderColor='var(--border)'"
+            onkeydown="if(event.key==='Enter') addLibClip()">
+          <input id="lib-clip-dur" type="text" placeholder="0:30"
+            style="width:55px;background:var(--dark3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.7rem;padding:7px 8px;outline:none;"
+            onfocus="this.style.borderColor='var(--cyan)'"
+            onblur="this.style.borderColor='var(--border)'">
+          <button class="btn btn-secondary" style="width:auto;padding:7px 10px;font-size:0.65rem;white-space:nowrap;" onclick="addLibClip()">+ ADD</button>
+        </div>
+
+        <!-- Library list -->
+        <div id="lib-list" style="display:flex;flex-direction:column;gap:4px;"></div>
+        <div id="lib-empty" style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#333344;text-align:center;padding:20px 0;letter-spacing:1px;">
+          NO CLIPS — ADD ABOVE
+        </div>
+
+      </div>
+    </div>
+
+    <!-- COL 2: INJECTION RULES -->
+    <div class="inj-col">
+      <div class="inj-col-header">
+        <div class="dot" style="width:6px;height:6px;background:var(--orange);box-shadow:0 0 6px var(--orange)"></div>
+        Injection Rules
+      </div>
+      <div class="inj-col-body">
+
+        <!-- Content playlist source -->
+        <div style="background:var(--dark3);border:1px solid var(--border);border-radius:3px;padding:10px;">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Content Source</div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <div id="inj-content-status" style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--green);flex:1;">
+              ✓ Reading from current playlist
+            </div>
+            <button class="btn btn-secondary" style="width:auto;padding:6px 10px;font-size:0.6rem;white-space:nowrap;" onclick="document.getElementById('inj-m3u-input').click()">
+              Import .M3U
+            </button>
+            <input type="file" id="inj-m3u-input" accept=".m3u,.m3u8,.json" style="display:none" onchange="importContentPlaylist(event)">
+          </div>
+          <div id="inj-content-count" style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#555566;margin-top:5px;"></div>
+        </div>
+
+        <!-- Default rule -->
+        <div class="rule-card is-default" id="default-rule-card">
+          <span class="rule-badge badge-default">Default Rule</span>
+          <div class="rule-row">
+            <span class="rule-label">Interval</span>
+            <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);">every</span>
+            <input class="rule-input" id="rule-interval" type="number" value="2" min="1" max="99" oninput="refreshJSON()">
+            <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);">content items</span>
+          </div>
+          <div class="rule-row">
+            <span class="rule-label">Ads / break</span>
+            <input class="rule-input" id="rule-min" type="number" value="1" min="1" max="10" oninput="refreshJSON()">
+            <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);">–</span>
+            <input class="rule-input" id="rule-max" type="number" value="2" min="1" max="10" oninput="refreshJSON()">
+          </div>
+          <div class="rule-row">
+            <span class="rule-label">Selection</span>
+            <select class="rule-select" id="rule-selection" onchange="refreshJSON()">
+              <option value="random">Random</option>
+              <option value="sequential">Sequential</option>
+              <option value="pool">Pool</option>
+            </select>
+          </div>
+          <div class="bumper-row">
+            <input type="checkbox" class="bumper-check" id="def-pre-check" onchange="refreshJSON()">
+            <span class="bumper-label">Pre</span>
+            <select class="bumper-select" id="def-pre-clip" onchange="refreshJSON()">
+              <option value="">— none —</option>
+            </select>
+            <input type="checkbox" class="bumper-check" id="def-post-check" onchange="refreshJSON()">
+            <span class="bumper-label">Post</span>
+            <select class="bumper-select" id="def-post-clip" onchange="refreshJSON()">
+              <option value="">— none —</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Override rules -->
+        <div id="overrides-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+
+        <button class="btn btn-secondary" style="width:100%;font-size:0.65rem;" onclick="addOverride()">
+          + Add Position Override
+        </button>
+
+      </div>
+    </div>
+
+    <!-- COL 3: JSON + PREVIEW -->
+    <div class="inj-col">
+      <div class="inj-col-header">
+        <div class="dot" style="width:6px;height:6px;background:var(--green);box-shadow:0 0 6px var(--green)"></div>
+        <span>JSON Template</span>
+        <button onclick="toggleJsonEdit()" id="json-edit-btn"
+          style="margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:1px;padding:3px 8px;background:var(--dark3);border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;text-transform:uppercase;">
+          Edit
+        </button>
+        <button onclick="downloadTemplate()"
+          style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:1px;padding:3px 8px;background:var(--dark3);border:1px solid var(--border);border-radius:2px;color:var(--text-dim);cursor:pointer;text-transform:uppercase;">
+          ↓ Save
+        </button>
+      </div>
+      <textarea id="json-preview" class="json-box" readonly oninput="onJsonEdit()"></textarea>
+
+      <!-- Merged preview -->
+      <div style="padding:10px 14px;border-top:1px solid var(--border);background:var(--dark2);">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;">Merged Preview</div>
+        <div id="merged-preview" class="content-preview" style="max-height:200px;overflow-y:auto;"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="injector-footer">
+    <div class="injector-status" id="inj-status">Ready — configure rules and generate</div>
+    <div class="inj-btn-row">
+      <button class="btn btn-secondary" style="width:auto;padding:10px 18px;" onclick="closeInjectorBtn()">Cancel</button>
+      <button class="btn" style="width:auto;padding:10px 20px;background:var(--cyan);color:var(--dark);font-family:'Russo One',sans-serif;letter-spacing:2px;border:none;" onclick="generateInjected()">
+        💉 INJECT &amp; UPDATE PLAYLIST
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT MODAL -->
+<div class="modal-overlay" id="about-modal">
+  <div class="about-modal">
+    <button class="modal-close" onclick="document.getElementById('about-modal').classList.remove('open')">&times;</button>
+    <h3>Drop Zone Ops</h3>
+    <div class="about-sub">A client-side M3U playlist builder for DIY broadcasters</div>
+
+    <p>Building an <code style="color:var(--orange);font-family:'Share Tech Mono',monospace">.m3u</code> playlist by hand is confusing and inaccessible to collaborators who aren't comfortable with file paths and formatting. Drop Zone Ops fixes that — it's a drag-and-drop playlist builder that outputs a clean, correctly formatted <code style="color:var(--orange);font-family:'Share Tech Mono',monospace">.m3u</code> file that works in both VLC and OBS's VLC source plugin.</p>
+
+    <p>It was built to support the DIY broadcast workflows behind <strong style="color:var(--orange)">schwwaaa</strong> and <strong style="color:var(--orange)">subcarrier.tv</strong> — community-run streaming channels that needed a simple way to assemble custom playlists with interstitial breaks, commercial bumpers, and mixed local/remote content, then hand them off to OBS.</p>
+
+    <p>No server. No install. No command line. Open the file in a browser and start building. Mix local file paths with remote URLs, tag your content by type, arrange your broadcast block exactly how you want it, then export.</p>
+
+    <div class="about-links">
+      <a class="about-link about-link-primary" href="https://schwwaaa.net" target="_blank" rel="noopener">🪂 schwwaaa.net</a>
+      <a class="about-link about-link-secondary" href="https://subcarrier.tv" target="_blank" rel="noopener">📡 subcarrier.tv</a>
+      <a class="about-link about-link-secondary" href="https://github.com/cyberboy666/obs_scheduler" target="_blank" rel="noopener">⚙ obs_scheduler (inspiration)</a>
+    </div>
+  </div>
+</div>
 
 <!-- ITEM EDIT MODAL -->
 <div class="modal-overlay" id="edit-modal">
@@ -1141,11 +1766,19 @@
     toast('Item updated', true);
   }
 
-  // close modal on overlay click
+  // close modals on overlay click
   document.getElementById('edit-modal').addEventListener('click', function(e) {
     if (e.target === this) closeModal();
   });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  document.getElementById('about-modal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeModal();
+      document.getElementById('about-modal').classList.remove('open');
+    }
+  });
 
   // ── EXPORT M3U ──
   function exportM3U() {
@@ -1205,6 +1838,448 @@
     el.className = 'toast show' + (success ? ' success' : '');
     clearTimeout(el._t);
     el._t = setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+
+  // ══════════════════════════════════════
+  //  COMMERCIAL INJECTION ENGINE
+  // ══════════════════════════════════════
+
+  let injLibrary = [];       // commercial clips
+  let injOverrides = [];     // position override rules
+  let injContentSource = null; // null = use live playlist
+  let jsonEditMode = false;
+
+  // ── OPEN / CLOSE ──
+  function openInjector() {
+    syncContentSource();
+    document.getElementById('injector-overlay').classList.add('open');
+    document.getElementById('injector-panel').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    refreshJSON();
+  }
+
+  function closeInjectorBtn() {
+    document.getElementById('injector-overlay').classList.remove('open');
+    document.getElementById('injector-panel').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function closeInjector(e) {
+    if (e.target === document.getElementById('injector-overlay')) closeInjectorBtn();
+  }
+
+  // ── SYNC CONTENT FROM LIVE PLAYLIST ──
+  function syncContentSource() {
+    injContentSource = null;
+    const count = playlist.filter(i => i.tag === 'content').length;
+    document.getElementById('inj-content-status').textContent = '✓ Reading from current playlist';
+    document.getElementById('inj-content-status').style.color = 'var(--green)';
+    document.getElementById('inj-content-count').textContent =
+      playlist.length + ' items (' + count + ' content)';
+  }
+
+  // ── IMPORT CONTENT PLAYLIST (.m3u or .json) ──
+  function importContentPlaylist(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const text = ev.target.result;
+      let items = [];
+      if (file.name.endsWith('.json')) {
+        try {
+          const data = JSON.parse(text);
+          items = (Array.isArray(data) ? data : data.playlist || data.items || []).map(i => ({
+            name: i.name || i.title || i.path?.split('/').pop() || 'untitled',
+            path: i.path || i.url || '',
+            duration: parseDur(String(i.duration || '0')),
+            tag: i.tag || 'content', group: i.group || ''
+          }));
+        } catch(err) { toast('JSON parse error: ' + err.message); return; }
+      } else {
+        // Parse .m3u
+        const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+        let curName = '';
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].startsWith('#EXTINF')) {
+            const match = lines[i].match(/,(.+)$/);
+            curName = match ? match[1] : 'untitled';
+          } else if (!lines[i].startsWith('#')) {
+            items.push({ name: curName || lines[i].split('/').pop(), path: lines[i], duration: 0, tag: 'content', group: '' });
+            curName = '';
+          }
+        }
+      }
+      injContentSource = items;
+      const count = items.filter(i => i.tag === 'content').length;
+      document.getElementById('inj-content-status').textContent = '✓ Imported: ' + file.name;
+      document.getElementById('inj-content-status').style.color = 'var(--cyan)';
+      document.getElementById('inj-content-count').textContent = items.length + ' items (' + count + ' content)';
+      refreshJSON();
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }
+
+  // ── IMPORT TEMPLATE JSON ──
+  function importInjTemplate(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const t = JSON.parse(ev.target.result);
+        // Load library
+        injLibrary = [];
+        if (t.commercial_library) {
+          if (t.commercial_library.source) document.getElementById('lib-base-path').value = t.commercial_library.source;
+          if (t.commercial_library.files) {
+            t.commercial_library.files.forEach(f => injLibrary.push({
+              name: f.name || f.path, path: f.path, duration: parseDur(String(f.duration || '0'))
+            }));
+          }
+        }
+        // Load default rule
+        if (t.breaks) {
+          document.getElementById('rule-interval').value = t.breaks.default_interval || 2;
+          document.getElementById('rule-min').value = t.breaks.min_ads || 1;
+          document.getElementById('rule-max').value = t.breaks.max_ads || 2;
+          document.getElementById('rule-selection').value = t.breaks.selection || 'random';
+          // default bumpers
+          const db = t.breaks.default_bumpers || {};
+          document.getElementById('def-pre-check').checked = !!db.pre;
+          document.getElementById('def-post-check').checked = !!db.post;
+          // Load overrides
+          injOverrides = (t.breaks.overrides || []).map(o => ({
+            after_item: o.after_item, min_ads: o.min_ads || 1, max_ads: o.max_ads || 1,
+            selection: o.selection || 'random', specific: o.clips || [],
+            pre_bumper: o.bumpers?.pre || '', post_bumper: o.bumpers?.post || '',
+            use_pre: !!o.bumpers?.pre, use_post: !!o.bumpers?.post
+          }));
+        }
+        renderLibrary();
+        renderOverrides();
+        refreshJSON();
+        toast('Template loaded', true);
+      } catch(err) { toast('Template parse error: ' + err.message); }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }
+
+  // ── LIBRARY ──
+  function addLibClip() {
+    const path = document.getElementById('lib-clip-path').value.trim();
+    const name = document.getElementById('lib-clip-name').value.trim();
+    const dur  = document.getElementById('lib-clip-dur').value.trim();
+    if (!path) { toast('Enter a path or URL'); return; }
+    injLibrary.push({ name: name || path.split('/').pop().replace(/\.\w+$/, ''), path, duration: parseDur(dur) });
+    document.getElementById('lib-clip-path').value = '';
+    document.getElementById('lib-clip-name').value = '';
+    document.getElementById('lib-clip-dur').value = '';
+    renderLibrary();
+    refreshJSON();
+  }
+
+  function removeLibClip(idx) {
+    injLibrary.splice(idx, 1);
+    renderLibrary();
+    refreshJSON();
+  }
+
+  function renderLibrary() {
+    const list = document.getElementById('lib-list');
+    const empty = document.getElementById('lib-empty');
+    list.innerHTML = '';
+    empty.style.display = injLibrary.length ? 'none' : 'block';
+    injLibrary.forEach((clip, idx) => {
+      const el = document.createElement('div');
+      el.className = 'lib-item';
+      el.innerHTML = `
+        <div class="lib-item-name" title="${escHtml(clip.path)}">${escHtml(clip.name)}</div>
+        <div class="lib-item-dur">${clip.duration > 0 ? formatDur(clip.duration) : '--:--'}</div>
+        <button class="lib-item-del" onclick="removeLibClip(${idx})">✕</button>
+      `;
+      list.appendChild(el);
+    });
+    updateBumperSelects();
+  }
+
+  function updateBumperSelects() {
+    const selects = document.querySelectorAll('.bumper-select, #def-pre-clip, #def-post-clip');
+    selects.forEach(sel => {
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">— none —</option>';
+      injLibrary.forEach(clip => {
+        const opt = document.createElement('option');
+        opt.value = clip.path;
+        opt.textContent = clip.name;
+        sel.appendChild(opt);
+      });
+      sel.value = cur;
+    });
+  }
+
+  // ── OVERRIDES ──
+  function addOverride() {
+    injOverrides.push({ after_item: 1, min_ads: 1, max_ads: 1, selection: 'random', specific: [], use_pre: false, pre_bumper: '', use_post: false, post_bumper: '' });
+    renderOverrides();
+    refreshJSON();
+  }
+
+  function removeOverride(idx) {
+    injOverrides.splice(idx, 1);
+    renderOverrides();
+    refreshJSON();
+  }
+
+  function renderOverrides() {
+    const container = document.getElementById('overrides-list');
+    container.innerHTML = '';
+    injOverrides.forEach((ov, idx) => {
+      const el = document.createElement('div');
+      el.className = 'rule-card is-override';
+      const libOptions = injLibrary.map(c => `<option value="${escHtml(c.path)}">${escHtml(c.name)}</option>`).join('');
+      el.innerHTML = `
+        <span class="rule-badge badge-override">Override #${idx+1}</span>
+        <button class="rule-del" onclick="removeOverride(${idx})">✕</button>
+        <div class="rule-row">
+          <span class="rule-label">After item</span>
+          <input class="rule-input" type="number" value="${ov.after_item}" min="1"
+            oninput="injOverrides[${idx}].after_item=+this.value;refreshJSON()">
+        </div>
+        <div class="rule-row">
+          <span class="rule-label">Ads</span>
+          <input class="rule-input" type="number" value="${ov.min_ads}" min="1" max="10"
+            oninput="injOverrides[${idx}].min_ads=+this.value;refreshJSON()">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--text-dim);">–</span>
+          <input class="rule-input" type="number" value="${ov.max_ads}" min="1" max="10"
+            oninput="injOverrides[${idx}].max_ads=+this.value;refreshJSON()">
+        </div>
+        <div class="rule-row">
+          <span class="rule-label">Selection</span>
+          <select class="rule-select" onchange="injOverrides[${idx}].selection=this.value;refreshJSON()">
+            <option value="random" ${ov.selection==='random'?'selected':''}>Random</option>
+            <option value="sequential" ${ov.selection==='sequential'?'selected':''}>Sequential</option>
+            <option value="specific" ${ov.selection==='specific'?'selected':''}>Specific clips</option>
+          </select>
+        </div>
+        <div class="bumper-row">
+          <input type="checkbox" class="bumper-check" ${ov.use_pre?'checked':''}
+            onchange="injOverrides[${idx}].use_pre=this.checked;refreshJSON()">
+          <span class="bumper-label">Pre</span>
+          <select class="bumper-select" onchange="injOverrides[${idx}].pre_bumper=this.value;refreshJSON()">
+            <option value="">— none —</option>${libOptions}
+          </select>
+          <input type="checkbox" class="bumper-check" ${ov.use_post?'checked':''}
+            onchange="injOverrides[${idx}].use_post=this.checked;refreshJSON()">
+          <span class="bumper-label">Post</span>
+          <select class="bumper-select" onchange="injOverrides[${idx}].post_bumper=this.value;refreshJSON()">
+            <option value="">— none —</option>${libOptions}
+          </select>
+        </div>
+      `;
+      container.appendChild(el);
+    });
+  }
+
+  // ── BUILD TEMPLATE OBJECT ──
+  function buildTemplate() {
+    const t = {
+      name: document.getElementById('playlist-name').value.trim() || 'playlist',
+      commercial_library: {
+        source: document.getElementById('lib-base-path').value.trim(),
+        files: injLibrary.map(c => ({ name: c.name, path: c.path, duration: formatDur(c.duration) }))
+      },
+      breaks: {
+        default_interval: parseInt(document.getElementById('rule-interval').value) || 2,
+        min_ads: parseInt(document.getElementById('rule-min').value) || 1,
+        max_ads: parseInt(document.getElementById('rule-max').value) || 2,
+        selection: document.getElementById('rule-selection').value,
+        default_bumpers: {},
+        overrides: injOverrides.map(o => {
+          const obj = { after_item: o.after_item, min_ads: o.min_ads, max_ads: o.max_ads, selection: o.selection };
+          if (o.use_pre || o.use_post) obj.bumpers = { pre: o.use_pre ? o.pre_bumper : '', post: o.use_post ? o.post_bumper : '' };
+          if (o.selection === 'specific' && o.specific.length) obj.clips = o.specific;
+          return obj;
+        })
+      }
+    };
+    // default bumpers
+    const preCheck  = document.getElementById('def-pre-check').checked;
+    const postCheck = document.getElementById('def-post-check').checked;
+    if (preCheck || postCheck) {
+      t.breaks.default_bumpers = {
+        pre:  preCheck  ? document.getElementById('def-pre-clip').value  : '',
+        post: postCheck ? document.getElementById('def-post-clip').value : ''
+      };
+    }
+    return t;
+  }
+
+  // ── JSON EDIT MODE ──
+  function toggleJsonEdit() {
+    jsonEditMode = !jsonEditMode;
+    const ta = document.getElementById('json-preview');
+    const btn = document.getElementById('json-edit-btn');
+    if (jsonEditMode) {
+      ta.removeAttribute('readonly');
+      ta.style.color = '#ffc800';
+      btn.textContent = 'Lock';
+      btn.style.borderColor = '#ffc800';
+      btn.style.color = '#ffc800';
+    } else {
+      ta.setAttribute('readonly', true);
+      ta.style.color = '#7ec8e3';
+      btn.textContent = 'Edit';
+      btn.style.borderColor = 'var(--border)';
+      btn.style.color = 'var(--text-dim)';
+      // parse back
+      try {
+        JSON.parse(ta.value);
+        toast('JSON locked', true);
+      } catch(e) { toast('Invalid JSON — fix before locking'); jsonEditMode = true; ta.removeAttribute('readonly'); }
+    }
+  }
+
+  function onJsonEdit() { /* live editing — no auto-parse to avoid disruption */ }
+
+  // ── REFRESH JSON PREVIEW ──
+  function refreshJSON() {
+    if (jsonEditMode) return; // don't overwrite manual edits
+    const t = buildTemplate();
+    document.getElementById('json-preview').value = JSON.stringify(t, null, 2);
+    renderMergedPreview(t);
+  }
+
+  function downloadTemplate() {
+    const json = document.getElementById('json-preview').value;
+    const name = (document.getElementById('playlist-name').value.trim() || 'template').replace(/[^a-zA-Z0-9_-]/g,'_');
+    const blob = new Blob([json], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name + '-injection-template.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Template saved', true);
+  }
+
+  // ── MERGED PREVIEW ──
+  function renderMergedPreview(t) {
+    const merged = buildMergedPlaylist(t);
+    const container = document.getElementById('merged-preview');
+    container.innerHTML = '';
+    merged.slice(0, 30).forEach((item, idx) => {
+      const el = document.createElement('div');
+      const cls = item.tag === 'commercial' ? 'cp-commercial' : item.tag === 'bumper' ? 'cp-bumper' : 'cp-content';
+      el.className = 'cp-item ' + cls;
+      el.innerHTML = `<span class="cp-num">${idx+1}</span> ${escHtml(item.name)}`;
+      container.appendChild(el);
+    });
+    if (merged.length > 30) {
+      const el = document.createElement('div');
+      el.style.cssText = 'font-family:Share Tech Mono,monospace;font-size:0.6rem;color:#333344;padding:4px 8px;';
+      el.textContent = '... and ' + (merged.length - 30) + ' more items';
+      container.appendChild(el);
+    }
+    document.getElementById('inj-status').textContent =
+      'Preview: ' + merged.length + ' total items (' +
+      merged.filter(i=>i.tag==='content').length + ' content, ' +
+      merged.filter(i=>i.tag==='commercial').length + ' commercial, ' +
+      merged.filter(i=>i.tag==='bumper').length + ' bumper)';
+  }
+
+  // ── THE INJECTION ENGINE ──
+  function buildMergedPlaylist(t) {
+    const source = injContentSource || playlist;
+    const contentItems = source.filter(i => i.tag === 'content' || !i.tag);
+    if (!contentItems.length || !injLibrary.length) return source.slice();
+
+    const interval   = t.breaks.default_interval || 2;
+    const minAds     = t.breaks.min_ads || 1;
+    const maxAds     = t.breaks.max_ads || 2;
+    const selection  = t.breaks.selection || 'random';
+    const defBumpers = t.breaks.default_bumpers || {};
+    const overrides  = t.breaks.overrides || [];
+
+    const merged = [];
+    let seqIdx = 0; // for sequential selection
+
+    function pickAds(rule, count) {
+      const sel = rule.selection || selection;
+      const ads = [];
+      for (let i = 0; i < count; i++) {
+        if (sel === 'sequential') {
+          ads.push(injLibrary[seqIdx % injLibrary.length]);
+          seqIdx++;
+        } else if (sel === 'specific' && rule.clips && rule.clips.length) {
+          ads.push(injLibrary.find(c => rule.clips.includes(c.path)) || injLibrary[0]);
+        } else {
+          ads.push(injLibrary[Math.floor(Math.random() * injLibrary.length)]);
+        }
+      }
+      return ads;
+    }
+
+    function makeAdItem(clip, tag) {
+      const bp = document.getElementById('lib-base-path').value.trim();
+      const isRemote = /^https?:\/\//i.test(clip.path);
+      const resolvedPath = (!isRemote && bp) ? bp.replace(/[\/]+$/, '') + '/' + clip.path : clip.path;
+      return { name: clip.name, path: resolvedPath, duration: clip.duration, tag: tag || 'commercial', group: 'injected' };
+    }
+
+    contentItems.forEach((item, idx) => {
+      merged.push(item);
+      const position = idx + 1; // 1-based
+      // check if a break fires here
+      const override = overrides.find(o => o.after_item === position);
+      const isBreak = override || (position % interval === 0 && idx < contentItems.length - 1);
+      if (!isBreak) return;
+
+      const rule = override || { min_ads: minAds, max_ads: maxAds, selection };
+      const bumpers = override?.bumpers || defBumpers;
+      const count = rule.min_ads === rule.max_ads ? rule.min_ads :
+        Math.floor(Math.random() * (rule.max_ads - rule.min_ads + 1)) + rule.min_ads;
+
+      // pre-bumper
+      if (bumpers.pre) {
+        const preClip = injLibrary.find(c => c.path === bumpers.pre);
+        if (preClip) merged.push(makeAdItem(preClip, 'bumper'));
+      }
+      // ads
+      pickAds(rule, count).forEach(ad => merged.push(makeAdItem(ad)));
+      // post-bumper
+      if (bumpers.post) {
+        const postClip = injLibrary.find(c => c.path === bumpers.post);
+        if (postClip) merged.push(makeAdItem(postClip, 'bumper'));
+      }
+    });
+
+    return merged;
+  }
+
+  // ── GENERATE — UPDATE PLAYLIST IN PLACE ──
+  function generateInjected() {
+    if (injLibrary.length === 0) { toast('Add clips to your commercial library first'); return; }
+    const source = injContentSource || playlist;
+    if (source.length === 0) { toast('No content playlist loaded'); return; }
+
+    let t;
+    if (jsonEditMode) {
+      try { t = JSON.parse(document.getElementById('json-preview').value); }
+      catch(e) { toast('Fix JSON errors before generating'); return; }
+    } else {
+      t = buildTemplate();
+    }
+
+    const merged = buildMergedPlaylist(t);
+    if (!merged.length) { toast('Nothing to generate'); return; }
+
+    playlist = merged;
+    render();
+    closeInjectorBtn();
+    toast('Playlist updated — ' + merged.length + ' items injected', true);
   }
 
   // ── INIT ──
