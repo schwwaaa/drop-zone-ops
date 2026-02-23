@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DROP ZONE OPS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #FF4500;
+    --orange-dim: #c23400;
+    --orange-glow: rgba(255,69,0,0.3);
+    --dark: #0a0a0f;
+    --dark2: #111118;
+    --dark3: #1a1a24;
+    --dark4: #222230;
+    --border: #2a2a3a;
+    --text: #e8e8f0;
+    --text-dim: #888899;
+    --green: #39ff14;
+    --cyan: #00ffcc;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--dark);
+    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SCANLINE overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    position: relative;
+    background-image: url('https://ultimateactionmovies.com/wp-content/uploads/2022/09/Drop-Zone-Movie-696x464.jpg');
+    background-size: cover;
+    background-position: center 30%;
+    border-bottom: 3px solid var(--orange);
+    padding: 3rem 2rem 2rem;
+    text-align: center;
+    overflow: hidden;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(10,10,15,0.5) 0%, rgba(10,10,15,0.85) 100%);
+  }
+  .header-inner { position: relative; z-index: 2; }
+  .logo {
+    font-family: 'Russo One', sans-serif;
+    font-size: clamp(3rem, 8vw, 6rem);
+    color: var(--orange);
+    text-shadow: 0 0 40px var(--orange-glow), 2px 2px 0 #000;
+    letter-spacing: 4px;
+    line-height: 1;
+  }
+  .tagline {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    margin-top: 0.5rem;
+    text-transform: uppercase;
+  }
+  .status-bar {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1rem;
+  }
+  .status-pill {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    padding: 4px 12px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text-dim);
+    background: rgba(0,0,0,0.4);
+  }
+  .status-pill.live { border-color: var(--green); color: var(--green); animation: blink 1.5s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── MAIN LAYOUT ── */
+  .app {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 0;
+    min-height: calc(100vh - 180px);
+  }
+
+  /* ── LEFT PANEL ── */
+  .left-panel {
+    border-right: 2px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: var(--dark2);
+    border-bottom: 2px solid var(--border);
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    color: var(--orange);
+    text-transform: uppercase;
+  }
+  .section-header .dot {
+    width: 8px; height: 8px;
+    background: var(--orange);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--orange);
+  }
+
+  /* ── DROP ZONE ── */
+  .dropzone-area {
+    margin: 20px;
+    border: 2px dashed var(--border);
+    border-radius: 4px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--dark2);
+    position: relative;
+    overflow: hidden;
+  }
+  .dropzone-area::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(255,69,0,0.03) 100%);
+  }
+  .dropzone-area:hover, .dropzone-area.drag-over {
+    border-color: var(--orange);
+    background: rgba(255,69,0,0.05);
+    box-shadow: inset 0 0 30px rgba(255,69,0,0.08);
+  }
+  .dropzone-area.drag-over { border-style: solid; }
+  .dz-icon { font-size: 3rem; margin-bottom: 12px; display: block; }
+  .dz-label {
+    font-family: 'Russo One', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  .dz-sub {
+    font-size: 0.8rem;
+    color: #555566;
+    margin-top: 6px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* ── URL INPUT ── */
+  .url-input-row {
+    display: flex;
+    gap: 8px;
+    margin: 0 20px 12px;
+  }
+  .url-input {
+    flex: 1;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .url-input::placeholder { color: #444455; }
+  .url-input:focus { border-color: var(--orange); }
+  .url-name-input {
+    width: 140px;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    padding: 10px 10px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .url-name-input::placeholder { color: #444455; }
+  .url-name-input:focus { border-color: var(--orange); }
+
+  /* ── PLAYLIST ── */
+  .playlist-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 20px 20px;
+  }
+  .playlist-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #333344;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+  }
+
+  .playlist-item {
+    display: grid;
+    grid-template-columns: 28px 1fr auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 4px;
+    cursor: grab;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .playlist-item:hover { border-color: var(--orange); background: var(--dark4); }
+  .playlist-item.dragging { opacity: 0.4; border-color: var(--orange); }
+  .playlist-item.drag-target { border-top: 2px solid var(--orange); }
+
+  .item-handle {
+    color: #444455;
+    font-size: 1rem;
+    text-align: center;
+    cursor: grab;
+    user-select: none;
+  }
+  .item-handle:hover { color: var(--orange); }
+
+  .item-info { min-width: 0; }
+  .item-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+  }
+  .item-name:hover { color: var(--orange); }
+  .item-name-edit {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    background: var(--dark);
+    border: 1px solid var(--orange);
+    border-radius: 2px;
+    color: var(--orange);
+    padding: 2px 6px;
+    width: 100%;
+    outline: none;
+  }
+  .item-meta {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .item-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1px solid;
+  }
+  .tag-content { background: rgba(0,255,204,0.1); color: var(--cyan); border-color: rgba(0,255,204,0.3); }
+  .tag-commercial { background: rgba(255,69,0,0.15); color: var(--orange); border-color: rgba(255,69,0,0.4); }
+  .tag-bumper { background: rgba(57,255,20,0.1); color: var(--green); border-color: rgba(57,255,20,0.3); }
+  .tag-interstitial { background: rgba(255,200,0,0.1); color: #ffc800; border-color: rgba(255,200,0,0.3); }
+  .tag-other { background: rgba(150,150,200,0.1); color: #aaaacc; border-color: rgba(150,150,200,0.3); }
+
+  .item-del {
+    background: none;
+    border: none;
+    color: #333344;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 2px;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .item-del:hover { color: #ff3333; }
+
+  .item-num {
+    position: absolute;
+    top: 3px; left: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.55rem;
+    color: #333344;
+  }
+
+  /* ── RIGHT PANEL ── */
+  .right-panel {
+    display: flex;
+    flex-direction: column;
+    background: var(--dark2);
+  }
+
+  /* ── TOOLBAR BUTTONS ── */
+  .toolbar {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+  .btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    width: 100%;
+  }
+  .btn-primary {
+    background: var(--orange);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--orange-dim); transform: translateY(-1px); box-shadow: 0 4px 20px var(--orange-glow); }
+  .btn-secondary {
+    background: var(--dark3);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--orange); color: var(--text); }
+  .btn-danger {
+    background: var(--dark3);
+    color: #ff4444;
+    border: 1px solid rgba(255,68,68,0.2);
+  }
+  .btn-danger:hover { background: rgba(255,68,68,0.1); border-color: #ff4444; }
+  .btn-icon { font-size: 1rem; }
+
+  /* ── IMPORT PANEL ── */
+  .import-section { padding: 16px; border-bottom: 2px solid var(--border); }
+  .import-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .import-drop {
+    border: 1px dashed var(--border);
+    border-radius: 3px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: #444455;
+    letter-spacing: 1px;
+  }
+  .import-drop:hover { border-color: var(--cyan); color: var(--cyan); }
+  .import-format {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: #333344;
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+  .import-format span { color: var(--cyan); }
+
+  /* ── STATS PANEL ── */
+  .stats-section { padding: 16px; border-bottom: 2px solid var(--border); }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+  .stat-val {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--orange);
+    font-weight: bold;
+  }
+
+  /* ── PREVIEW ── */
+  .preview-section { flex: 1; padding: 16px; overflow: auto; }
+  .preview-box {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: #555566;
+    line-height: 1.6;
+    max-height: 280px;
+    overflow-y: auto;
+    white-space: pre;
+  }
+  .preview-box .ext-header { color: var(--green); }
+  .preview-box .ext-inf { color: var(--orange); }
+  .preview-box .ext-path { color: var(--cyan); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 30px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--dark3);
+    border: 1px solid var(--orange);
+    border-radius: 4px;
+    padding: 12px 24px;
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    color: var(--orange);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s;
+    z-index: 10000;
+    box-shadow: 0 4px 30px var(--orange-glow);
+    text-transform: uppercase;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: var(--green); color: var(--green); box-shadow: 0 4px 30px rgba(57,255,20,0.2); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--dark2);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--orange);
+    border-radius: 4px;
+    padding: 28px;
+    width: 500px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal h3 {
+    font-family: 'Russo One', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 3px;
+    color: var(--orange);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .modal-close {
+    float: right;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.3rem;
+    cursor: pointer;
+    margin-top: -4px;
+  }
+  .modal-close:hover { color: var(--orange); }
+  .form-row { margin-bottom: 14px; }
+  .form-label {
+    display: block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .form-input, .form-select {
+    width: 100%;
+    background: var(--dark3);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--orange); }
+  .form-select option { background: var(--dark3); }
+  .modal-btns { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+
+  /* ── TAG SELECT ── */
+  .tag-select-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .tag-opt {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 2px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    background: var(--dark3);
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .tag-opt:hover { border-color: var(--orange); }
+  .tag-opt.selected { border-color: var(--orange); color: var(--orange); background: rgba(255,69,0,0.1); }
+  .tag-opt[data-val="commercial"].selected { border-color: var(--orange); color: var(--orange); }
+  .tag-opt[data-val="bumper"].selected { border-color: var(--green); color: var(--green); background: rgba(57,255,20,0.1); }
+  .tag-opt[data-val="interstitial"].selected { border-color: #ffc800; color: #ffc800; background: rgba(255,200,0,0.1); }
+  .tag-opt[data-val="content"].selected { border-color: var(--cyan); color: var(--cyan); background: rgba(0,255,204,0.1); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--dark); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--orange-dim); }
+
+  /* ── FOOTER ── */
+  .footer {
+    padding: 10px 20px;
+    border-top: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--dark2);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: #333344;
+    letter-spacing: 2px;
+  }
+  .footer-clock { color: var(--text-dim); }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .app { grid-template-columns: 1fr; }
+    .left-panel { border-right: none; border-bottom: 2px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">DROP ZONE OPS</div>
+    <div class="tagline">M3U Playlist Ops // OBS Automation // Broadcast Engineering</div>
+    <div class="status-bar">
+      <div class="status-pill live">● LIVE BUILDER</div>
+      <div class="status-pill">CLIENT-SIDE</div>
+      <div class="status-pill" id="item-count-pill">0 ITEMS</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="app">
+
+  <!-- ── LEFT: PLAYLIST BUILDER ── -->
+  <div class="left-panel">
+
+    <div class="section-header">
+      <div class="dot"></div>
+      DROP ZONE — ADD FILES TO PLAYLIST
+    </div>
+
+    <!-- Dropzone -->
+    <div class="dropzone-area" id="dropzone">
+      <span class="dz-icon">🪂</span>
+      <div class="dz-label">Drop video files here</div>
+      <div class="dz-sub">or click to browse — local files get their absolute path in the .m3u</div>
+      <input type="file" id="file-input" multiple accept="video/*,audio/*" style="display:none">
+    </div>
+
+    <!-- URL + Name row -->
+    <div class="url-input-row">
+      <input class="url-input" id="url-input" type="text" placeholder="paste remote URL (dropbox, s3, http...)">
+      <input class="url-name-input" id="url-name-input" type="text" placeholder="display name">
+      <button class="btn btn-primary" style="width:auto;padding:10px 16px;white-space:nowrap" onclick="addUrl()">+ ADD</button>
+    </div>
+
+    <!-- Playlist items -->
+    <div class="section-header" style="margin-top:0">
+      <div class="dot"></div>
+      PLAYLIST <span id="list-count" style="color:var(--text-dim);margin-left:8px">— EMPTY</span>
+    </div>
+
+    <div class="playlist-container" id="playlist">
+      <div class="playlist-empty" id="empty-msg">🪂 &nbsp; NO FILES YET — DROP OR PASTE TO BEGIN</div>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT: CONTROLS ── -->
+  <div class="right-panel">
+
+    <div class="section-header">
+      <div class="dot"></div>
+      OPERATIONS
+    </div>
+
+    <div class="toolbar">
+      <div style="margin-bottom:8px">
+        <div class="form-label" style="margin-bottom:5px;font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:2px;color:var(--text-dim)">PLAYLIST NAME</div>
+        <input class="form-input" id="playlist-name" type="text" placeholder="my-playlist" style="width:100%;background:var(--dark3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.8rem;padding:9px 12px;outline:none;transition:border-color 0.2s" onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+      <button class="btn btn-primary" onclick="exportM3U()">
+        <span class="btn-icon">📡</span> Export .M3U Playlist
+      </button>
+      <button class="btn btn-secondary" onclick="document.getElementById('file-input').click()">
+        <span class="btn-icon">📁</span> Browse Local Files
+      </button>
+      <button class="btn btn-secondary" onclick="document.getElementById('import-input').click()">
+        <span class="btn-icon">📋</span> Import CSV / JSON
+      </button>
+      <button class="btn btn-secondary" onclick="sortByTag()">
+        <span class="btn-icon">🔀</span> Sort by Tag
+      </button>
+      <button class="btn btn-danger" onclick="clearAll()">
+        <span class="btn-icon">✕</span> Clear Playlist
+      </button>
+      <input type="file" id="import-input" accept=".csv,.json" style="display:none" onchange="handleImport(event)">
+    </div>
+
+    <!-- Import Format Info -->
+    <div class="import-section">
+      <div class="import-label">Import Format Reference</div>
+      <div class="import-format">
+        <span>CSV headers:</span><br>
+        path, name, duration, tag, group<br><br>
+        <span>JSON array:</span><br>
+        [{"path":"...","name":"...","duration":0,<br>
+        "tag":"content","group":"block-1"}]<br><br>
+        <span>tags:</span> content / commercial / bumper / interstitial
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-section">
+      <div class="section-header" style="padding:0 0 10px 0;border:none;background:none;font-size:0.65rem">
+        <div class="dot" style="width:6px;height:6px"></div> PLAYLIST STATS
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">TOTAL ITEMS</span>
+        <span class="stat-val" id="stat-total">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">CONTENT</span>
+        <span class="stat-val" id="stat-content">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">COMMERCIAL</span>
+        <span class="stat-val" id="stat-commercial">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">BUMPER</span>
+        <span class="stat-val" id="stat-bumper">0</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">INTERSTITIAL</span>
+        <span class="stat-val" id="stat-interstitial">0</span>
+      </div>
+      <div class="stat-row" style="border-top:1px solid var(--orange-dim);margin-top:4px;padding-top:8px">
+        <span class="stat-label" style="color:var(--text)">TOTAL TIME</span>
+        <span class="stat-val" id="stat-runtime" style="font-size:1rem;color:var(--green)">--:--:--</span>
+      </div>
+    </div>
+
+    <!-- M3U Preview -->
+    <div class="preview-section">
+      <div class="section-header" style="padding:0 0 10px 0;border:none;background:none;font-size:0.65rem">
+        <div class="dot" style="width:6px;height:6px"></div> M3U PREVIEW
+      </div>
+      <div class="preview-box" id="m3u-preview"># drop files to see preview</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <span>DROP ZONE OPS // CLIENT-SIDE M3U BUILDER</span>
+  <span class="footer-clock" id="clock"></span>
+  <span>schwwaaa.net // subcarrier.tv</span>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ITEM EDIT MODAL -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <h3>Edit Item</h3>
+    <div class="form-row">
+      <label class="form-label">Display Name</label>
+      <input class="form-input" id="edit-name" type="text">
+    </div>
+    <div class="form-row">
+      <label class="form-label">File Path / URL</label>
+      <input class="form-input" id="edit-path" type="text">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Duration (e.g. 1:30 or 5:28, leave blank if unknown)</label>
+      <input class="form-input" id="edit-duration" type="text" placeholder="MM:SS or H:MM:SS">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Tag / Type</label>
+      <div class="tag-select-row" id="edit-tag-row">
+        <div class="tag-opt selected" data-val="content">Content</div>
+        <div class="tag-opt" data-val="commercial">Commercial</div>
+        <div class="tag-opt" data-val="bumper">Bumper</div>
+        <div class="tag-opt" data-val="interstitial">Interstitial</div>
+        <div class="tag-opt" data-val="other">Other</div>
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">Group / Block</label>
+      <input class="form-input" id="edit-group" type="text" placeholder="e.g. block-1, act-2, ad-break">
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-secondary" style="width:auto" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" style="width:auto" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── STATE ──
+  let playlist = [];
+  let dragSrcIdx = null;
+  let editIdx = null;
+
+  // ── CLOCK ──
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleTimeString('en-US', {hour12: false}) + ' LOCAL';
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // ── DROPZONE ──
+  const dz = document.getElementById('dropzone');
+  const fileInput = document.getElementById('file-input');
+
+  dz.addEventListener('click', () => fileInput.click());
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault();
+    dz.classList.remove('drag-over');
+    handleFiles(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+  function handleFiles(files) {
+    Array.from(files).forEach(file => {
+      // For local files, use the name as path reference
+      // (browser security means we can't get the full absolute path — user can edit path after)
+      const name = file.name.replace(/\.[^.]+$/, '');
+      const path = file.name; // they'll need to set the absolute path or it'll be relative
+      addItem({ name, path, duration: 0, tag: 'content', group: '', isLocal: true });
+    });
+  }
+
+  // ── ADD URL ──
+  function addUrl() {
+    const url = document.getElementById('url-input').value.trim();
+    const name = document.getElementById('url-name-input').value.trim();
+    if (!url) { toast('Paste a URL first', false); return; }
+    const autoName = name || url.split('/').pop().split('?')[0].replace(/\.[^.]+$/, '') || 'untitled';
+    addItem({ name: autoName, path: url, duration: 0, tag: 'content', group: '', isLocal: false });
+    document.getElementById('url-input').value = '';
+    document.getElementById('url-name-input').value = '';
+  }
+  document.getElementById('url-input').addEventListener('keydown', e => { if (e.key === 'Enter') addUrl(); });
+
+  // ── ADD ITEM ──
+  function addItem(item) {
+    playlist.push(item);
+    render();
+  }
+
+  // ── IMPORT CSV/JSON ──
+  function handleImport(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const text = ev.target.result;
+      try {
+        if (file.name.endsWith('.json')) {
+          const data = JSON.parse(text);
+          const arr = Array.isArray(data) ? data : data.playlist || data.items || [];
+          arr.forEach(item => addItem({
+            name: item.name || item.title || item.path?.split('/').pop() || 'untitled',
+            path: item.path || item.url || item.src || '',
+            duration: Number(item.duration) || 0,
+            tag: item.tag || item.type || item.category || 'content',
+            group: item.group || item.block || ''
+          }));
+          toast(`Imported ${arr.length} items from JSON`, true);
+        } else {
+          // CSV
+          const lines = text.trim().split('\n');
+          const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,'').toLowerCase());
+          const items = lines.slice(1).filter(l => l.trim());
+          items.forEach(line => {
+            const vals = parseCSVLine(line);
+            const obj = {};
+            headers.forEach((h, i) => obj[h] = (vals[i] || '').replace(/^"|"$/g, '').trim());
+            addItem({
+              name: obj.name || obj.title || obj.path?.split('/').pop() || 'untitled',
+              path: obj.path || obj.url || obj.src || '',
+              duration: Number(obj.duration) || 0,
+              tag: obj.tag || obj.type || obj.category || 'content',
+              group: obj.group || obj.block || ''
+            });
+          });
+          toast(`Imported ${items.length} items from CSV`, true);
+        }
+      } catch(err) {
+        toast('Import failed: ' + err.message, false);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }
+
+  function parseCSVLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { inQuotes = !inQuotes; }
+      else if (line[i] === ',' && !inQuotes) { result.push(current); current = ''; }
+      else { current += line[i]; }
+    }
+    result.push(current);
+    return result;
+  }
+
+  // ── RENDER ──
+  function render() {
+    const container = document.getElementById('playlist');
+    const emptyMsg = document.getElementById('empty-msg');
+
+    if (playlist.length === 0) {
+      container.innerHTML = '<div class="playlist-empty" id="empty-msg">🪂 &nbsp; NO FILES YET — DROP OR PASTE TO BEGIN</div>';
+      updateStats();
+      updatePreview();
+      return;
+    }
+    if (emptyMsg) emptyMsg.remove();
+
+    // Remove old items, keep only .playlist-item elements
+    container.querySelectorAll('.playlist-item').forEach(el => el.remove());
+
+    playlist.forEach((item, idx) => {
+      const el = document.createElement('div');
+      el.className = 'playlist-item';
+      el.draggable = true;
+      el.dataset.idx = idx;
+
+      const tagClass = `tag-${item.tag || 'content'}`;
+      const dur = item.duration > 0 ? formatDur(item.duration) : '--:--';
+      const pathShort = item.path.length > 45 ? '...' + item.path.slice(-42) : item.path;
+
+      el.innerHTML = `
+        <span class="item-num">${idx+1}</span>
+        <span class="item-handle" title="drag to reorder">⠿</span>
+        <div class="item-info">
+          <div class="item-name" onclick="openEdit(${idx})" title="click to edit">${escHtml(item.name)}</div>
+          <div class="item-meta" title="${escHtml(item.path)}">${escHtml(pathShort)}${item.group ? ` · ${item.group}` : ''} · ${dur}</div>
+        </div>
+        <div class="item-tag ${tagClass}" onclick="cycleTag(${idx})" title="click to change tag">${item.tag || 'content'}</div>
+        <button class="item-del" onclick="removeItem(${idx})" title="remove">✕</button>
+      `;
+
+      el.addEventListener('dragstart', () => { dragSrcIdx = idx; el.classList.add('dragging'); });
+      el.addEventListener('dragend', () => el.classList.remove('dragging'));
+      el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('drag-target'); });
+      el.addEventListener('dragleave', () => el.classList.remove('drag-target'));
+      el.addEventListener('drop', e => {
+        e.preventDefault();
+        el.classList.remove('drag-target');
+        if (dragSrcIdx !== null && dragSrcIdx !== idx) {
+          const moved = playlist.splice(dragSrcIdx, 1)[0];
+          playlist.splice(idx, 0, moved);
+          dragSrcIdx = null;
+          render();
+        }
+      });
+
+      container.appendChild(el);
+    });
+
+    updateStats();
+    updatePreview();
+    updatePill();
+  }
+
+  function updatePill() {
+    document.getElementById('item-count-pill').textContent = `${playlist.length} ITEM${playlist.length !== 1 ? 'S' : ''}`;
+    document.getElementById('list-count').textContent = playlist.length ? `— ${playlist.length} TRACKS` : '— EMPTY';
+  }
+
+  function updateStats() {
+    const tags = ['content','commercial','bumper','interstitial'];
+    document.getElementById('stat-total').textContent = playlist.length;
+    tags.forEach(t => {
+      document.getElementById(`stat-${t}`).textContent = playlist.filter(i => i.tag === t).length;
+    });
+    const totalSec = playlist.reduce((s, i) => s + (i.duration || 0), 0);
+    document.getElementById('stat-runtime').textContent = totalSec > 0 ? formatDur(totalSec) : '--:--:--';
+  }
+
+  function updatePreview() {
+    if (playlist.length === 0) {
+      document.getElementById('m3u-preview').innerHTML = '<span style="color:#333344"># drop files to see preview</span>';
+      return;
+    }
+    let preview = '<span class="ext-header">#EXTM3U</span>\n';
+    const shown = playlist.slice(0, 8);
+    shown.forEach(item => {
+      const dur = item.duration || 0;
+      const grp = item.group ? ` group-title="${escHtml(item.group)}"` : '';
+      preview += `<span class="ext-inf">#EXTINF:${dur}${grp},${escHtml(item.name)}</span>\n`;
+      preview += `<span class="ext-path">${escHtml(item.path)}</span>\n`;
+    });
+    if (playlist.length > 8) {
+      preview += `<span style="color:#333344">... and ${playlist.length - 8} more items</span>`;
+    }
+    document.getElementById('m3u-preview').innerHTML = preview;
+  }
+
+  // ── REMOVE / CLEAR ──
+  function removeItem(idx) {
+    playlist.splice(idx, 1);
+    render();
+  }
+
+  function clearAll() {
+    if (playlist.length === 0) return;
+    if (confirm('Clear the entire playlist?')) {
+      playlist = [];
+      render();
+      toast('Playlist cleared');
+    }
+  }
+
+  // ── CYCLE TAG ──
+  const TAG_CYCLE = ['content', 'commercial', 'bumper', 'interstitial', 'other'];
+  function cycleTag(idx) {
+    const cur = TAG_CYCLE.indexOf(playlist[idx].tag || 'content');
+    playlist[idx].tag = TAG_CYCLE[(cur + 1) % TAG_CYCLE.length];
+    render();
+  }
+
+  // ── SORT BY TAG ──
+  const TAG_ORDER = { content: 0, commercial: 1, bumper: 2, interstitial: 3, other: 4 };
+  function sortByTag() {
+    playlist.sort((a, b) => (TAG_ORDER[a.tag] || 0) - (TAG_ORDER[b.tag] || 0));
+    render();
+    toast('Sorted by tag');
+  }
+
+  // ── EDIT MODAL ──
+  function openEdit(idx) {
+    editIdx = idx;
+    const item = playlist[idx];
+    document.getElementById('edit-name').value = item.name || '';
+    document.getElementById('edit-path').value = item.path || '';
+    document.getElementById('edit-duration').value = item.duration > 0 ? formatDur(item.duration) : '';
+    document.getElementById('edit-group').value = item.group || '';
+
+    document.querySelectorAll('#edit-tag-row .tag-opt').forEach(opt => {
+      opt.classList.toggle('selected', opt.dataset.val === (item.tag || 'content'));
+    });
+    document.querySelectorAll('#edit-tag-row .tag-opt').forEach(opt => {
+      opt.onclick = () => {
+        document.querySelectorAll('#edit-tag-row .tag-opt').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+      };
+    });
+
+    document.getElementById('edit-modal').classList.add('open');
+    document.getElementById('edit-name').focus();
+  }
+
+  function closeModal() {
+    document.getElementById('edit-modal').classList.remove('open');
+    editIdx = null;
+  }
+
+  function saveEdit() {
+    if (editIdx === null) return;
+    const selTag = document.querySelector('#edit-tag-row .tag-opt.selected');
+    playlist[editIdx] = {
+      ...playlist[editIdx],
+      name: document.getElementById('edit-name').value.trim() || playlist[editIdx].name,
+      path: document.getElementById('edit-path').value.trim() || playlist[editIdx].path,
+      duration: parseDur(document.getElementById('edit-duration').value),
+      tag: selTag ? selTag.dataset.val : playlist[editIdx].tag,
+      group: document.getElementById('edit-group').value.trim()
+    };
+    closeModal();
+    render();
+    toast('Item updated', true);
+  }
+
+  // close modal on overlay click
+  document.getElementById('edit-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  // ── EXPORT M3U ──
+  function exportM3U() {
+    if (playlist.length === 0) { toast('Add some files first!'); return; }
+
+    let m3u = '#EXTM3U\n';
+    playlist.forEach(item => {
+      const dur = item.duration || 0;
+      const grpAttr = item.group ? ` group-title="${item.group}"` : '';
+      const tagAttr = item.tag ? ` tvg-type="${item.tag}"` : '';
+      m3u += `#EXTINF:${dur}${grpAttr}${tagAttr},${item.name}\n`;
+      m3u += `${item.path}\n`;
+    });
+
+    const playlistName = (document.getElementById('playlist-name').value.trim() || 'playlist').replace(/[^a-zA-Z0-9_\-]/g, '_');
+    const blob = new Blob([m3u], { type: 'application/x-mpegurl' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `${playlistName}.m3u`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast(`Exported ${playlist.length} items → .m3u`, true);
+  }
+
+  // ── UTILS ──
+  function formatDur(sec) {
+    if (!sec || sec <= 0) return '--:--';
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = Math.floor(sec % 60);
+    if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    return `${m}:${String(s).padStart(2,'0')}`;
+  }
+
+  // Parse "1:30", "5:28", "1:02:45" → seconds
+  function parseDur(str) {
+    if (!str || str.trim() === '') return 0;
+    const parts = String(str).trim().split(':').map(Number);
+    if (parts.some(isNaN)) return 0;
+    if (parts.length === 3) return parts[0]*3600 + parts[1]*60 + parts[2];
+    if (parts.length === 2) return parts[0]*60 + parts[1];
+    return parts[0]; // just seconds fallback
+  }
+
+  function escHtml(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function toast(msg, success = false) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast show' + (success ? ' success' : '');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+  // ── INIT ──
+  render();
+</script>
+</body>
+</html>
