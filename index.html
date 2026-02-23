@@ -1506,11 +1506,33 @@
   }
 
   function handleFiles(files) {
-    Array.from(files).forEach(file => {
+    const fileArray = Array.from(files);
+
+    function processNext(i) {
+      if (i >= fileArray.length) return;
+      const file = fileArray[i];
       const name = file.name.replace(/\.[^.]+$/, '');
       const path = buildPath(file.name);
-      addItem({ name, path, duration: 0, tag: 'content', group: '', isLocal: true });
-    });
+
+      const url = URL.createObjectURL(file);
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+
+      function cleanup(duration) {
+        video.onloadedmetadata = null;
+        video.onerror = null;
+        video.src = '';
+        URL.revokeObjectURL(url);
+        addItem({ name, path, duration, tag: 'content', group: '', isLocal: true });
+        processNext(i + 1); // move to next file only after this one is done
+      }
+
+      video.onloadedmetadata = () => cleanup(Math.round(video.duration) || 0);
+      video.onerror = () => cleanup(0);
+      video.src = url;
+    }
+
+    processNext(0);
   }
 
   // ── ADD URL ──
@@ -1599,6 +1621,7 @@
       container.innerHTML = '<div class="playlist-empty" id="empty-msg">🪂 &nbsp; NO FILES YET — DROP OR PASTE TO BEGIN</div>';
       updateStats();
       updatePreview();
+      updatePill();
       return;
     }
     if (emptyMsg) emptyMsg.remove();
