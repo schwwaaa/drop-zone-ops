@@ -141,6 +141,89 @@ The exported file is compatible with both **VLC** and **OBS VLC Source**.
 
 ---
 
+## Commercial Injection
+
+The **💉 Commercial Injection** panel lets you automatically weave commercials, bumpers, and breaks into your content playlist using a reusable JSON template — no manual rearranging required.
+
+Click the **💉 Commercial Injection** button at the bottom of the Operations panel. It slides in from the right over the existing UI.
+
+### How it works
+
+The injector takes your content playlist and a set of rules, then outputs a fully merged playlist back into Drop Zone Ops — ready to export as a single `.m3u`.
+
+The panel has three columns:
+
+**1. Commercial Library** — your pool of ad clips. Add clips by filename (combined with the library base path) or full remote URL. Each clip gets a display name and optional duration. Any clip in the library can also be assigned as a pre or post break bumper.
+
+**2. Injection Rules** — where you define when and how breaks fire:
+
+- **Default Rule** — fires automatically every N content items. Set the interval, min/max ads per break, and selection mode
+- **Position Overrides** — fire a different rule at a specific item number, overriding the default for that break only
+- **Bumpers** — optionally assign a pre-break and/or post-break clip per rule (e.g. "After these messages..." / "And we're back...")
+
+**Selection modes:**
+
+| Mode | Behavior |
+|---|---|
+| `random` | Picks ads randomly from the library each time |
+| `sequential` | Cycles through the library in order across all breaks |
+| `specific` | Uses exact clips you name in the template |
+
+**3. JSON Template + Preview** — the live template JSON updates as you configure. You can:
+- **Edit** the JSON directly (click **Edit** to unlock, **Lock** to validate and snap back)
+- **↓ Save** the template as a `.json` file to reuse across sessions
+- **Import Template JSON** to load a previously saved template
+- See a **Merged Preview** of the final injected playlist in real time, color-coded by type
+
+### Content source
+
+The injector auto-reads your current Drop Zone playlist. You can also import a separate `.m3u` or `.json` file as the content source if you want to work independently of the live playlist.
+
+### Generating the output
+
+Click **💉 INJECT & UPDATE PLAYLIST** — the injector merges your content and commercials according to the rules and replaces the Drop Zone playlist in place. Then export your `.m3u` as normal.
+
+### Template format reference
+
+The injection template is a plain JSON file you can save, share, and reuse:
+
+```json
+{
+  "name": "saturday-night-block",
+  "commercial_library": {
+    "source": "/Users/yourname/Videos/commercials/",
+    "files": [
+      { "name": "Soda Ad", "path": "soda-ad.mp4", "duration": "0:30" },
+      { "name": "Car Ad", "path": "car-ad.mp4", "duration": "0:30" },
+      { "name": "And We're Back", "path": "back-bumper.mp4", "duration": "0:08" }
+    ]
+  },
+  "breaks": {
+    "default_interval": 2,
+    "min_ads": 1,
+    "max_ads": 2,
+    "selection": "random",
+    "default_bumpers": {
+      "post": "/Users/yourname/Videos/commercials/back-bumper.mp4"
+    },
+    "overrides": [
+      {
+        "after_item": 1,
+        "min_ads": 2,
+        "max_ads": 2,
+        "selection": "sequential",
+        "bumpers": {
+          "pre": "/Users/yourname/Videos/commercials/into-break.mp4",
+          "post": "/Users/yourname/Videos/commercials/back-bumper.mp4"
+        }
+      }
+    ]
+  }
+}
+```
+
+---
+
 ## Using the playlist in OBS
 
 <p align="left">
