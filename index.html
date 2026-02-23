@@ -618,11 +618,34 @@
       DROP ZONE — ADD FILES TO PLAYLIST
     </div>
 
+    <!-- Base Path -->
+    <div style="margin: 16px 20px 0; display:flex; flex-direction:column; gap:6px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <label for="base-path" style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:2px;color:var(--text-dim);white-space:nowrap;text-transform:uppercase;">📁 Local Base Path</label>
+        <div id="base-path-status" style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#333344;margin-left:auto;"></div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <input
+          id="base-path"
+          type="text"
+          placeholder="e.g. /Users/yourname/Videos  or  C:\Users\yourname\Videos"
+          style="flex:1;background:var(--dark3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.75rem;padding:10px 12px;outline:none;transition:border-color 0.2s;"
+          oninput="onBasePathChange()"
+          onfocus="this.style.borderColor='var(--orange)'"
+          onblur="this.style.borderColor=this.value?'var(--green)':'var(--border)'"
+        >
+        <button class="btn btn-secondary" style="width:auto;padding:10px 14px;white-space:nowrap;font-size:0.65rem;" onclick="applyBasePathToAll()" title="Prepend base path to all existing local items">APPLY ALL</button>
+      </div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#333344;line-height:1.5;">
+        Set once → all dropped files use this path. Remote URLs are unaffected.
+      </div>
+    </div>
+
     <!-- Dropzone -->
-    <div class="dropzone-area" id="dropzone">
+    <div class="dropzone-area" id="dropzone" style="margin-top:12px;">
       <span class="dz-icon">🪂</span>
       <div class="dz-label">Drop video files here</div>
-      <div class="dz-sub">or click to browse — local files get their absolute path in the .m3u</div>
+      <div class="dz-sub">files will be prefixed with your base path above</div>
       <input type="file" id="file-input" multiple accept="video/*,audio/*" style="display:none">
     </div>
 
@@ -658,6 +681,7 @@
         <div class="form-label" style="margin-bottom:5px;font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:2px;color:var(--text-dim)">PLAYLIST NAME</div>
         <input class="form-input" id="playlist-name" type="text" placeholder="my-playlist" style="width:100%;background:var(--dark3);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.8rem;padding:9px 12px;outline:none;transition:border-color 0.2s" onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border)'">
       </div>
+
       <button class="btn btn-primary" onclick="exportM3U()">
         <span class="btn-icon">📡</span> Export .M3U Playlist
       </button>
@@ -807,12 +831,59 @@
   });
   fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
+  function getBasePath() {
+    let bp = (document.getElementById('base-path').value || '').trim();
+    if (!bp) return '';
+    // Normalize: ensure trailing slash, handle both / and \
+    bp = bp.replace(/[/\\]+$/, ''); // strip trailing slashes
+    // Detect Windows path
+    const isWin = bp.match(/^[a-zA-Z]:\\/);
+    return bp + (isWin ? '\\' : '/');
+  }
+
+  function isRemoteUrl(path) {
+    return /^https?:\/\//i.test(path) || /^ftp:\/\//i.test(path);
+  }
+
+  function buildPath(filename) {
+    const bp = getBasePath();
+    return bp ? bp + filename : filename;
+  }
+
+  function onBasePathChange() {
+    const bp = getBasePath();
+    const status = document.getElementById('base-path-status');
+    if (bp) {
+      status.textContent = '✓ SET';
+      status.style.color = 'var(--green)';
+      document.getElementById('base-path').style.borderColor = 'var(--green)';
+    } else {
+      status.textContent = '';
+      document.getElementById('base-path').style.borderColor = 'var(--border)';
+    }
+  }
+
+  // Apply base path retroactively to all existing local items
+  function applyBasePathToAll() {
+    const bp = getBasePath();
+    if (!bp) { toast('Set a base path first'); return; }
+    let count = 0;
+    playlist.forEach(item => {
+      if (!isRemoteUrl(item.path)) {
+        // Strip any existing base path prefix if re-applying, then apply fresh
+        const filename = item.path.split(/[/\\]/).pop();
+        item.path = bp + filename;
+        count++;
+      }
+    });
+    render();
+    toast(`Base path applied to ${count} local item${count !== 1 ? 's' : ''}`, true);
+  }
+
   function handleFiles(files) {
     Array.from(files).forEach(file => {
-      // For local files, use the name as path reference
-      // (browser security means we can't get the full absolute path — user can edit path after)
       const name = file.name.replace(/\.[^.]+$/, '');
-      const path = file.name; // they'll need to set the absolute path or it'll be relative
+      const path = buildPath(file.name);
       addItem({ name, path, duration: 0, tag: 'content', group: '', isLocal: true });
     });
   }
@@ -918,14 +989,16 @@
 
       const tagClass = `tag-${item.tag || 'content'}`;
       const dur = item.duration > 0 ? formatDur(item.duration) : '--:--';
-      const pathShort = item.path.length > 45 ? '...' + item.path.slice(-42) : item.path;
+      const pathDisplay = item.path.length > 48 ? '…' + item.path.slice(-45) : item.path;
+      const hasAbsPath = isRemoteUrl(item.path) || item.path.includes('/') || item.path.includes('\\');
+      const pathColor = isRemoteUrl(item.path) ? 'var(--cyan)' : hasAbsPath ? 'var(--green)' : 'var(--orange)';
 
       el.innerHTML = `
         <span class="item-num">${idx+1}</span>
         <span class="item-handle" title="drag to reorder">⠿</span>
         <div class="item-info">
           <div class="item-name" onclick="openEdit(${idx})" title="click to edit">${escHtml(item.name)}</div>
-          <div class="item-meta" title="${escHtml(item.path)}">${escHtml(pathShort)}${item.group ? ` · ${item.group}` : ''} · ${dur}</div>
+          <div class="item-meta" title="${escHtml(item.path)}" style="color:${pathColor}">${escHtml(pathDisplay)}${item.group ? ` · ${item.group}` : ''}</div>
         </div>
         <div class="item-tag ${tagClass}" onclick="cycleTag(${idx})" title="click to change tag">${item.tag || 'content'}</div>
         <button class="item-del" onclick="removeItem(${idx})" title="remove">✕</button>
@@ -974,16 +1047,21 @@
       document.getElementById('m3u-preview').innerHTML = '<span style="color:#333344"># drop files to see preview</span>';
       return;
     }
+    const noPath = playlist.filter(i => !isRemoteUrl(i.path) && !i.path.includes('/') && !i.path.includes('\\')).length;
     let preview = '<span class="ext-header">#EXTM3U</span>\n';
-    const shown = playlist.slice(0, 8);
+    if (noPath > 0) {
+      preview += `<span style="color:var(--orange)">## ⚠ ${noPath} local item(s) missing base path — set above</span>\n`;
+    }
+    const shown = playlist.slice(0, 6);
     shown.forEach(item => {
       const dur = item.duration || 0;
       const grp = item.group ? ` group-title="${escHtml(item.group)}"` : '';
       preview += `<span class="ext-inf">#EXTINF:${dur}${grp},${escHtml(item.name)}</span>\n`;
-      preview += `<span class="ext-path">${escHtml(item.path)}</span>\n`;
+      const pathCol = isRemoteUrl(item.path) ? 'var(--cyan)' : (item.path.includes('/') || item.path.includes('\\') ? 'var(--green)' : 'var(--orange)');
+      preview += `<span style="color:${pathCol}">${escHtml(item.path)}</span>\n`;
     });
-    if (playlist.length > 8) {
-      preview += `<span style="color:#333344">... and ${playlist.length - 8} more items</span>`;
+    if (playlist.length > 6) {
+      preview += `<span style="color:#333344">... and ${playlist.length - 6} more items</span>`;
     }
     document.getElementById('m3u-preview').innerHTML = preview;
   }
@@ -1073,6 +1151,11 @@
   function exportM3U() {
     if (playlist.length === 0) { toast('Add some files first!'); return; }
 
+    const noPath = playlist.filter(i => !isRemoteUrl(i.path) && !i.path.includes('/') && !i.path.includes('\\')).length;
+    if (noPath > 0) {
+      if (!confirm(`⚠ ${noPath} local item(s) have no base path set — they'll export as filename only and may not work in OBS.\n\nExport anyway?`)) return;
+    }
+
     let m3u = '#EXTM3U\n';
     playlist.forEach(item => {
       const dur = item.duration || 0;
@@ -1083,7 +1166,7 @@
     });
 
     const playlistName = (document.getElementById('playlist-name').value.trim() || 'playlist').replace(/[^a-zA-Z0-9_\-]/g, '_');
-    const blob = new Blob([m3u], { type: 'application/x-mpegurl' });
+    const blob = new Blob([m3u.trimEnd()], { type: 'application/x-mpegurl' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `${playlistName}.m3u`;
