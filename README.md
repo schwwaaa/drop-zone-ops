@@ -153,9 +153,15 @@ The injector takes your content playlist and a set of rules, then outputs a full
 
 The panel has three columns:
 
-**1. Commercial Library** — your pool of ad clips. Add clips by filename (combined with the library base path) or full remote URL. Each clip gets a display name and optional duration. Any clip in the library can also be assigned as a pre or post break bumper.
+**1. Commercial Library** — your pool of ad clips. Add clips by filename (combined with the library base path) or full remote URL. 
+
+https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-comminjection-comlibrary.png?raw=true
+
+Each clip gets a display name and optional duration. Any clip in the library can also be assigned as a pre or post break bumper.
 
 **2. Injection Rules** — where you define when and how breaks fire:
+
+https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-comminjectiondetail-rules.png?raw=true
 
 - **Default Rule** — fires automatically every N content items. Set the interval, min/max ads per break, and selection mode
 - **Position Overrides** — fire a different rule at a specific item number, overriding the default for that break only
