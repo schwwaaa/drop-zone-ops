@@ -155,13 +155,17 @@ The panel has three columns:
 
 **1. Commercial Library** — your pool of ad clips. Add clips by filename (combined with the library base path) or full remote URL. 
 
-https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-comminjection-comlibrary.png?raw=true
+<p align="left">
+  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-comminjection-comlibrary.png?raw=true"/> 
+</p>
 
 Each clip gets a display name and optional duration. Any clip in the library can also be assigned as a pre or post break bumper.
 
 **2. Injection Rules** — where you define when and how breaks fire:
 
-https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-comminjectiondetail-rules.png?raw=true
+<p align="left">
+  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-comminjectiondetail-rules.png?raw=true"/> 
+</p>
 
 - **Default Rule** — fires automatically every N content items. Set the interval, min/max ads per break, and selection mode
 - **Position Overrides** — fire a different rule at a specific item number, overriding the default for that break only
@@ -175,7 +179,13 @@ https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-comminjecti
 | `sequential` | Cycles through the library in order across all breaks |
 | `specific` | Uses exact clips you name in the template |
 
-**3. JSON Template + Preview** — the live template JSON updates as you configure. You can:
+**3. JSON Template + Preview** — the live template JSON updates as you configure. 
+
+<p align="left">
+  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-comminjectiondetail-jsontemplate.png?raw=true"/> 
+</p>
+
+You can:
 - **Edit** the JSON directly (click **Edit** to unlock, **Lock** to validate and snap back)
 - **↓ Save** the template as a `.json` file to reuse across sessions
 - **Import Template JSON** to load a previously saved template
