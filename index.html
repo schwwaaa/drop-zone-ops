@@ -1043,7 +1043,7 @@
     <!-- Base Path -->
     <div style="margin: 16px 20px 0; display:flex; flex-direction:column; gap:6px;">
       <div style="display:flex; align-items:center; gap:10px;">
-        <label for="base-path" style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:2px;color:var(--text-dim);white-space:nowrap;text-transform:uppercase;">📁 Local Base Path</label>
+        <label for="base-path" style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;letter-spacing:2px;color:var(--text-dim);white-space:nowrap;text-transform:uppercase;">📁 Root Folder Path</label>
         <div id="base-path-status" style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#333344;margin-left:auto;"></div>
       </div>
       <div style="display:flex;gap:8px;">
@@ -1059,15 +1059,15 @@
         <button class="btn btn-secondary" style="width:auto;padding:10px 14px;white-space:nowrap;font-size:0.65rem;" onclick="applyBasePathToAll()" title="Prepend base path to all existing local items">APPLY ALL</button>
       </div>
       <div style="font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:#333344;line-height:1.5;">
-        Set once → all dropped files use this path. Remote URLs are unaffected.
+        Set your root folder. Folder drops build full nested paths automatically. Individual file drops use this as prefix.
       </div>
     </div>
 
     <!-- Dropzone -->
     <div class="dropzone-area" id="dropzone" style="margin-top:12px;">
       <span class="dz-icon">🪂</span>
-      <div class="dz-label">Drop video files here</div>
-      <div class="dz-sub">files will be prefixed with your base path above</div>
+      <div class="dz-label">Drop files or folders here</div>
+      <div class="dz-sub">folders preserve nested paths · individual files use root path below</div>
       <input type="file" id="file-input" multiple accept="video/*,audio/*" style="display:none">
     </div>
 
@@ -1254,10 +1254,22 @@
           <button class="btn btn-secondary" style="width:auto;padding:7px 10px;font-size:0.65rem;white-space:nowrap;" onclick="addLibClip()">+ ADD</button>
         </div>
 
+        <!-- Library drop zone -->
+        <div id="lib-dropzone"
+          style="border:1px dashed var(--cyan);border-radius:3px;padding:14px;text-align:center;cursor:pointer;transition:all 0.2s;background:rgba(0,255,204,0.02);"
+          ondragover="event.preventDefault();this.style.background='rgba(0,255,204,0.07)';this.style.borderColor='var(--cyan)'"
+          ondragleave="this.style.background='rgba(0,255,204,0.02)';this.style.borderColor='var(--cyan)'"
+          ondrop="event.preventDefault();this.style.background='rgba(0,255,204,0.02)';handleLibDrop(event)"
+          onclick="document.getElementById('lib-file-input').click()">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--cyan);letter-spacing:1px;">📂 DROP CLIPS OR FOLDER</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:0.58rem;color:#333344;margin-top:4px;letter-spacing:1px;">or click to browse</div>
+          <input type="file" id="lib-file-input" multiple accept="video/*,audio/*" style="display:none" onchange="handleLibFiles(event.target.files)">
+        </div>
+
         <!-- Library list -->
         <div id="lib-list" style="display:flex;flex-direction:column;gap:4px;"></div>
-        <div id="lib-empty" style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#333344;text-align:center;padding:20px 0;letter-spacing:1px;">
-          NO CLIPS — ADD ABOVE
+        <div id="lib-empty" style="font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:#333344;text-align:center;padding:10px 0;letter-spacing:1px;">
+          NO CLIPS — DROP FILES OR ADD ABOVE
         </div>
 
       </div>
@@ -1452,7 +1464,7 @@
   dz.addEventListener('drop', e => {
     e.preventDefault();
     dz.classList.remove('drag-over');
-    handleFiles(e.dataTransfer.files);
+    handleDropItems(e.dataTransfer.items || e.dataTransfer.files);
   });
   fileInput.addEventListener('change', e => handleFiles(e.target.files));
 
@@ -1470,8 +1482,13 @@
     return /^https?:\/\//i.test(path) || /^ftp:\/\//i.test(path);
   }
 
-  function buildPath(filename) {
+  function buildPath(filename, relativePath) {
     const bp = getBasePath();
+    // If we have a relative path from a folder drop (e.g. "shows/s2/ep01.mp4"), use it
+    if (relativePath && relativePath !== filename) {
+      return bp ? bp + relativePath : relativePath;
+    }
+    // Individual file — just use filename with base path
     return bp ? bp + filename : filename;
   }
 
@@ -1505,14 +1522,58 @@
     toast(`Base path applied to ${count} local item${count !== 1 ? 's' : ''}`, true);
   }
 
-  function handleFiles(files) {
-    const fileArray = Array.from(files);
+  // Handle folder drops via dataTransfer.items (preserves relative paths)
+  function handleDropItems(items) {
+    const fileEntries = [];
+
+    function traverseEntry(entry, path) {
+      return new Promise(resolve => {
+        if (entry.isFile) {
+          entry.file(file => {
+            fileEntries.push({ file, relativePath: path + file.name });
+            resolve();
+          }, resolve);
+        } else if (entry.isDirectory) {
+          const reader = entry.createReader();
+          function readBatch() {
+            reader.readEntries(entries => {
+              if (!entries.length) return resolve();
+              Promise.all(entries.map(e => traverseEntry(e, path + entry.name + '/'))).then(readBatch);
+            }, resolve);
+          }
+          readBatch();
+        } else {
+          resolve();
+        }
+      });
+    }
+
+    // dataTransfer.items gives us FileSystemEntry access
+    if (items && items[0] && items[0].webkitGetAsEntry) {
+      const promises = Array.from(items).map(item => {
+        const entry = item.webkitGetAsEntry();
+        return entry ? traverseEntry(entry, '') : Promise.resolve();
+      });
+      Promise.all(promises).then(() => processFileEntries(fileEntries));
+    } else {
+      // Fallback: plain FileList (no relative paths)
+      handleFiles(items);
+    }
+  }
+
+  function processFileEntries(entries) {
+    // Filter to video/audio only
+    const videoExts = /\.(mp4|mov|avi|mkv|webm|m4v|flv|wmv|mpg|mpeg|ogv|ts|mts|m2ts|mp3|aac|wav|flac|ogg|m4a)$/i;
+    const filtered = entries.filter(e => videoExts.test(e.file.name));
 
     function processNext(i) {
-      if (i >= fileArray.length) return;
-      const file = fileArray[i];
+      if (i >= filtered.length) {
+        if (filtered.length) toast(filtered.length + ' file' + (filtered.length !== 1 ? 's' : '') + ' added', true);
+        return;
+      }
+      const { file, relativePath } = filtered[i];
       const name = file.name.replace(/\.[^.]+$/, '');
-      const path = buildPath(file.name);
+      const path = buildPath(file.name, relativePath);
 
       const url = URL.createObjectURL(file);
       const video = document.createElement('video');
@@ -1524,7 +1585,7 @@
         video.src = '';
         URL.revokeObjectURL(url);
         addItem({ name, path, duration, tag: 'content', group: '', isLocal: true });
-        processNext(i + 1); // move to next file only after this one is done
+        processNext(i + 1);
       }
 
       video.onloadedmetadata = () => cleanup(Math.round(video.duration) || 0);
@@ -1533,6 +1594,12 @@
     }
 
     processNext(0);
+  }
+
+  function handleFiles(files) {
+    const fileArray = Array.from(files);
+    const entries = fileArray.map(file => ({ file, relativePath: file.webkitRelativePath || file.name }));
+    processFileEntries(entries);
   }
 
   // ── ADD URL ──
@@ -1703,8 +1770,8 @@
     const shown = playlist.slice(0, 6);
     shown.forEach(item => {
       const dur = item.duration || 0;
-      const grp = item.group ? ` group-title="${escHtml(item.group)}"` : '';
-      preview += `<span class="ext-inf">#EXTINF:${dur}${grp},${escHtml(item.name)}</span>\n`;
+      const tvgP = item.tag ? ` tvg-type="${item.tag}"` : ' tvg-type="content"';
+      preview += `<span class="ext-inf">#EXTINF:${dur}${tvgP},${escHtml(item.name)}</span>\n`;
       const pathCol = isRemoteUrl(item.path) ? 'var(--cyan)' : (item.path.includes('/') || item.path.includes('\\') ? 'var(--green)' : 'var(--orange)');
       preview += `<span style="color:${pathCol}">${escHtml(item.path)}</span>\n`;
     });
@@ -1815,9 +1882,8 @@
     let m3u = '#EXTM3U\n';
     playlist.forEach(item => {
       const dur = item.duration || 0;
-      const grpAttr = item.group ? ` group-title="${item.group}"` : '';
-      const tagAttr = item.tag ? ` tvg-type="${item.tag}"` : '';
-      m3u += `#EXTINF:${dur}${grpAttr}${tagAttr},${item.name}\n`;
+      const tvgType = item.tag ? ` tvg-type="${item.tag}"` : ' tvg-type="content"';
+      m3u += `#EXTINF:${dur}${tvgType},${item.name}\n`;
       m3u += `${item.path}\n`;
     });
 
@@ -1992,6 +2058,83 @@
   }
 
   // ── LIBRARY ──
+  // ── LIBRARY DROP ZONE ──
+  function handleLibDrop(e) {
+    const items = e.dataTransfer.items;
+    const fileEntries = [];
+
+    function traverseEntry(entry, path) {
+      return new Promise(resolve => {
+        if (entry.isFile) {
+          entry.file(file => { fileEntries.push({ file, relativePath: path + file.name }); resolve(); }, resolve);
+        } else if (entry.isDirectory) {
+          const reader = entry.createReader();
+          function readBatch() {
+            reader.readEntries(entries => {
+              if (!entries.length) return resolve();
+              Promise.all(entries.map(e => traverseEntry(e, path + entry.name + '/'))).then(readBatch);
+            }, resolve);
+          }
+          readBatch();
+        } else { resolve(); }
+      });
+    }
+
+    if (items && items[0] && items[0].webkitGetAsEntry) {
+      Promise.all(Array.from(items).map(item => {
+        const entry = item.webkitGetAsEntry();
+        return entry ? traverseEntry(entry, '') : Promise.resolve();
+      })).then(() => processLibEntries(fileEntries));
+    } else {
+      handleLibFiles(e.dataTransfer.files);
+    }
+  }
+
+  function handleLibFiles(files) {
+    const entries = Array.from(files).map(file => ({ file, relativePath: file.webkitRelativePath || file.name }));
+    processLibEntries(entries);
+  }
+
+  function processLibEntries(entries) {
+    const videoExts = /\.(mp4|mov|avi|mkv|webm|m4v|flv|wmv|mpg|mpeg|ogv|ts|mts|m2ts|mp3|aac|wav|flac|ogg|m4a)$/i;
+    const filtered = entries.filter(e => videoExts.test(e.file.name));
+
+    function processNext(i) {
+      if (i >= filtered.length) {
+        if (filtered.length) toast(filtered.length + ' clip' + (filtered.length !== 1 ? 's' : '') + ' added to library', true);
+        return;
+      }
+      const { file, relativePath } = filtered[i];
+      const libBp = document.getElementById('lib-base-path').value.trim().replace(/[/\\]+$/, '');
+      const sep = libBp && libBp.match(/^[a-zA-Z]:\\/) ? '\\' : '/';
+      const name = file.name.replace(/\.[^.]+$/, '');
+      // Use relativePath if it includes folder structure, otherwise fall back to filename
+      const relPart = (relativePath && relativePath !== file.name) ? relativePath : file.name;
+      const path = libBp ? libBp + sep + relPart : relPart;
+
+      const url = URL.createObjectURL(file);
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+
+      function cleanup(duration) {
+        video.onloadedmetadata = null;
+        video.onerror = null;
+        video.src = '';
+        URL.revokeObjectURL(url);
+        injLibrary.push({ name, path, duration });
+        renderLibrary();
+        refreshJSON();
+        processNext(i + 1);
+      }
+
+      video.onloadedmetadata = () => cleanup(Math.round(video.duration) || 0);
+      video.onerror = () => cleanup(0);
+      video.src = url;
+    }
+
+    processNext(0);
+  }
+
   function addLibClip() {
     const path = document.getElementById('lib-clip-path').value.trim();
     const name = document.getElementById('lib-clip-name').value.trim();
@@ -2248,8 +2391,10 @@
     function makeAdItem(clip, tag) {
       const bp = document.getElementById('lib-base-path').value.trim();
       const isRemote = /^https?:\/\//i.test(clip.path);
-      const resolvedPath = (!isRemote && bp) ? bp.replace(/[\/]+$/, '') + '/' + clip.path : clip.path;
-      return { name: clip.name, path: resolvedPath, duration: clip.duration, tag: tag || 'commercial', group: 'injected' };
+      const isAbsolute = clip.path.startsWith('/') || /^[a-zA-Z]:\\/.test(clip.path);
+      // Only prepend base path if path is a bare filename (not already absolute or remote)
+      const resolvedPath = (!isRemote && !isAbsolute && bp) ? bp.replace(/[\/]+$/, '') + '/' + clip.path : clip.path;
+      return { name: clip.name, path: resolvedPath, duration: clip.duration, tag: tag || 'commercial', group: '' };
     }
 
     contentItems.forEach((item, idx) => {
