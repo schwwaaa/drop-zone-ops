@@ -147,6 +147,8 @@ The **💉 Commercial Injection** panel lets you automatically weave commercials
 
 Click the **💉 Commercial Injection** button at the bottom of the Operations panel. It slides in from the right over the existing UI.
 
+<img width="985" height="413" alt="Screenshot 2026-06-04 at 22 23 01" src="https://github.com/user-attachments/assets/87df0e20-cfae-4401-aef7-1a93ad1e10fc" />
+
 ### How it works
 
 The injector takes your content playlist and a set of rules, then outputs a fully merged playlist back into Drop Zone Ops — ready to export as a single `.m3u`.
