@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/><script data-js-marker="true">document.documentElement.classList.add('js');</script>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Documentation — Drop Zone Ops</title>
+<meta content="Bayhem-styled documentation for building M3U playlists, importing CSV and JSON, injecting commercials, and using Drop Zone Ops with OBS and VLC." name="description"/>
+<meta content="#080b10" name="theme-color"/>
+<style>
+    :root {
+      --bg: #06090d;
+      --bg-2: #0b1017;
+      --panel: rgba(10, 15, 22, .95);
+      --panel-2: rgba(15, 21, 30, .96);
+      --line: rgba(255, 255, 255, .12);
+      --line-hot: rgba(255, 92, 22, .58);
+      --orange: #ff5a16;
+      --orange-2: #e54000;
+      --cyan: #28c8ff;
+      --mint: #4ff0c1;
+      --text: #f6f6f6;
+      --muted: #b8bec8;
+      --dim: #747c88;
+      --display: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      --condensed: "Arial Narrow", "Roboto Condensed", Arial, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --max: 1180px;
+      --shadow: 0 30px 90px rgba(0, 0, 0, .46);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: var(--condensed);
+      background:
+        radial-gradient(circle at 84% 7%, rgba(255, 90, 22, .14), transparent 28%),
+        linear-gradient(180deg, #05080d 0%, #080c12 42%, #090d13 72%, #05080c 100%);
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      pointer-events: none;
+      opacity: .18;
+      background:
+        repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,.018) 3px 4px),
+        radial-gradient(circle at 70% 15%, rgba(255,104,34,.08), transparent 24%);
+    }
+    body::after {
+      content: "";
+      position: fixed;
+      right: 0;
+      top: 140px;
+      bottom: 0;
+      width: min(170px, 16vw);
+      pointer-events: none;
+      opacity: .22;
+      background: url('assets/bayhem-edge-fire.webp') top right / 100% auto repeat-y;
+      mix-blend-mode: screen;
+    }
+
+    img { display: block; max-width: 100%; }
+    a { color: inherit; }
+    button { font: inherit; }
+    .container { width: min(var(--max), calc(100% - 40px)); margin-inline: auto; }
+    .skip-link {
+      position: fixed;
+      left: 12px;
+      top: -80px;
+      z-index: 1000;
+      padding: 10px 14px;
+      background: var(--orange);
+      color: #fff;
+      text-decoration: none;
+    }
+    .skip-link:focus { top: 12px; }
+
+    /* NAV — same system as the landing page */
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      min-height: 68px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: rgba(4,8,12,.9);
+      backdrop-filter: blur(12px);
+    }
+    .nav-inner {
+      min-height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .brand { display: inline-flex; align-items: center; text-decoration: none; }
+    .brand img { width: 136px; height: auto; }
+    .nav-links { display: flex; align-items: center; gap: 27px; }
+    .nav-links a {
+      color: #e9edf2;
+      text-decoration: none;
+      font-family: var(--display);
+      font-size: .76rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transition: color .15s ease;
+    }
+    .nav-links a:hover,
+    .nav-links a[aria-current="page"] { color: var(--orange); }
+    .nav-launch {
+      min-height: 42px;
+      padding: 0 19px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(180deg, #ff641f, #dc3c00);
+      border: 1px solid #ff7a3d;
+      box-shadow: 0 12px 30px rgba(229,61,0,.22);
+      color: #fff !important;
+    }
+    .nav-toggle {
+      display: none;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      background: #0b1118;
+      color: #fff;
+      font-family: var(--mono);
+      text-transform: uppercase;
+      font-size: .72rem;
+    }
+
+    /* TYPE + CONTROLS */
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--orange);
+      font-family: var(--mono);
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, h3 {
+      font-family: var(--display);
+      text-transform: uppercase;
+      letter-spacing: .01em;
+    }
+    h1 {
+      max-width: 660px;
+      margin-bottom: 18px;
+      font-size: clamp(4rem, 8vw, 7.4rem);
+      line-height: .88;
+      text-shadow: 0 5px 18px rgba(0,0,0,.55);
+    }
+    h1 .orange { color: var(--orange); }
+    h2 { margin-bottom: 18px; font-size: clamp(2.45rem, 4.5vw, 4.35rem); line-height: .95; }
+    h3 { margin: 30px 0 10px; font-size: 1.5rem; line-height: 1; }
+    p, li { color: var(--muted); }
+    .button-row, .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; }
+    .button {
+      min-height: 52px;
+      padding: 0 21px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      border: 1px solid rgba(255,255,255,.22);
+      background: rgba(7,11,16,.84);
+      color: #fff;
+      text-decoration: none;
+      font-family: var(--display);
+      font-size: .93rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+    .button:hover { transform: translateY(-2px); border-color: var(--orange); box-shadow: 0 0 28px rgba(255,90,22,.16); }
+    .button.primary, .button-primary {
+      background: linear-gradient(180deg, #ff641f, #dd3f00);
+      border-color: #ff7a3e;
+      box-shadow: 0 15px 32px rgba(229,63,0,.22);
+    }
+    .button-secondary { background: rgba(7,11,16,.84); }
+
+    /* CINEMATIC DOCS HERO */
+    .docs-hero {
+      position: relative;
+      min-height: 430px;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .docs-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        linear-gradient(90deg, rgba(5,8,13,.99) 0%, rgba(5,8,13,.94) 42%, rgba(5,8,13,.25) 72%, rgba(5,8,13,.38) 100%),
+        linear-gradient(0deg, #070a0e 0%, transparent 25%);
+    }
+    .docs-hero-art {
+      position: absolute;
+      inset: 0 0 0 auto;
+      width: min(66vw, 820px);
+      height: 100%;
+      object-fit: cover;
+      object-position: right center;
+      filter: saturate(1.08) contrast(1.04);
+    }
+    .docs-hero-inner {
+      position: relative;
+      z-index: 2;
+      min-height: 430px;
+      display: grid;
+      grid-template-columns: 1fr .72fr;
+      align-items: center;
+      gap: 44px;
+    }
+    .docs-hero-copy { padding: 52px 0 60px; }
+    .docs-hero-copy .lede {
+      max-width: 560px;
+      margin-bottom: 26px;
+      color: #d7dbe1;
+      font-size: 1.08rem;
+      line-height: 1.5;
+    }
+    .manual-status {
+      justify-self: end;
+      width: min(100%, 340px);
+      padding: 20px;
+      border: 1px solid var(--line-hot);
+      background: linear-gradient(180deg, rgba(12,17,24,.9), rgba(7,11,16,.93));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.025), 0 24px 70px rgba(0,0,0,.4);
+    }
+    .manual-status .status-title {
+      margin: 0 0 16px;
+      color: #fff;
+      font-family: var(--display);
+      font-size: 1.15rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .status-cell {
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(5,9,14,.72);
+    }
+    .status-cell strong { display: block; color: var(--orange); font-family: var(--display); font-size: 1.35rem; }
+    .status-cell span { color: var(--dim); font-family: var(--mono); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; }
+
+    /* DOCUMENTATION LAYOUT */
+    .docs-stage { position: relative; padding: 28px 0 76px; }
+    .docs-layout {
+      display: grid;
+      grid-template-columns: 255px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+    .docs-sidebar {
+      position: sticky;
+      top: 92px;
+      padding: 18px;
+      border: 1px solid var(--line-hot);
+      background: linear-gradient(180deg, rgba(12,17,24,.97), rgba(7,11,16,.97));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02), 0 18px 46px rgba(0,0,0,.32);
+    }
+    .docs-sidebar::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 0%, rgba(255,89,22,.08), transparent 30%);
+    }
+    .docs-sidebar-title {
+      position: relative;
+      margin-bottom: 13px;
+      color: var(--orange);
+      font-family: var(--display);
+      font-size: 1rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .docs-sidebar-title::after { content: " / FIELD INDEX"; color: #fff; }
+    .docs-sidebar nav { position: relative; display: grid; }
+    .docs-sidebar a {
+      padding: 9px 9px;
+      border-bottom: 1px solid rgba(255,255,255,.065);
+      color: var(--muted);
+      text-decoration: none;
+      font-family: var(--mono);
+      font-size: .68rem;
+      line-height: 1.25;
+      text-transform: uppercase;
+      transition: color .15s ease, background .15s ease, padding-left .15s ease;
+    }
+    .docs-sidebar a:hover { padding-left: 13px; color: var(--orange); background: rgba(255,90,22,.04); }
+    .docs-sidebar a::before { content: "› "; color: var(--orange); }
+
+    .docs-content { counter-reset: section; min-width: 0; }
+    .docs-content > section {
+      counter-increment: section;
+      position: relative;
+      margin-bottom: 22px;
+      padding: 31px 34px 35px;
+      scroll-margin-top: 92px;
+      border: 1px solid var(--line-hot);
+      background:
+        linear-gradient(180deg, rgba(12,17,24,.97), rgba(7,11,16,.97));
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02), 0 22px 62px rgba(0,0,0,.31);
+      overflow: hidden;
+    }
+    .docs-content > section::before {
+      content: "0" counter(section);
+      position: absolute;
+      right: 24px;
+      top: 10px;
+      color: rgba(255,90,22,.15);
+      font-family: var(--display);
+      font-size: 4.2rem;
+      line-height: 1;
+    }
+    .docs-content > section::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 75% 0%, rgba(255,89,22,.06), transparent 28%),
+        linear-gradient(135deg, transparent 70%, rgba(255,90,22,.025));
+    }
+    .docs-content > section > * { position: relative; z-index: 1; }
+    .docs-content h2 { max-width: 760px; padding-right: 70px; }
+    .docs-content p, .docs-content li { line-height: 1.56; }
+    .docs-content ul, .docs-content ol { padding-left: 23px; }
+    .docs-content li + li { margin-top: 8px; }
+    .docs-content a:not(.button) { color: var(--cyan); text-underline-offset: 3px; }
+
+    /* QUICK START */
+    .quick-steps {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 25px 0;
+      counter-reset: quick;
+    }
+    .quick-step {
+      counter-increment: quick;
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      padding: 13px 15px;
+      border: 1px solid rgba(255,255,255,.085);
+      background: linear-gradient(145deg, rgba(16,22,31,.95), rgba(8,12,18,.95));
+      color: #d9dde4;
+    }
+    .quick-step::before {
+      content: "0" counter(quick);
+      flex: 0 0 auto;
+      margin-right: 12px;
+      color: var(--orange);
+      font-family: var(--display);
+      font-size: 1.28rem;
+    }
+
+    /* IMAGES */
+    .doc-shot {
+      margin: 24px 0;
+      padding: 8px;
+      border: 1px solid rgba(255,100,28,.62);
+      background: #070a0f;
+      box-shadow: 0 0 0 1px rgba(255,90,22,.13), 0 0 34px rgba(255,90,22,.12), 0 20px 48px rgba(0,0,0,.35);
+    }
+    .doc-shot img { width: 100%; border: 1px solid rgba(255,255,255,.07); }
+    .doc-shot figcaption {
+      padding: 10px 6px 3px;
+      color: var(--dim);
+      font-family: var(--mono);
+      font-size: .68rem;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    /* CALLOUTS */
+    .note, .warning {
+      position: relative;
+      margin: 24px 0;
+      padding: 18px 20px 18px 22px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: linear-gradient(150deg, rgba(16,22,31,.96), rgba(8,12,18,.96));
+    }
+    .note { border-left: 3px solid var(--cyan); }
+    .warning { border-left: 3px solid var(--orange); }
+    .note strong, .warning strong {
+      display: block;
+      margin-bottom: 5px;
+      font-family: var(--display);
+      font-size: .93rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .note strong { color: var(--cyan); }
+    .warning strong { color: var(--orange); }
+
+    /* CODE + TABLES */
+    .code-wrap { position: relative; margin: 22px 0; }
+    pre {
+      margin: 0;
+      overflow: auto;
+      padding: 21px;
+      border: 1px solid rgba(255,255,255,.11);
+      background: #04070b;
+      color: #dce2ea;
+      font-family: var(--mono);
+      font-size: .78rem;
+      line-height: 1.65;
+      box-shadow: inset 0 0 30px rgba(0,0,0,.34);
+    }
+    code { font-family: var(--mono); }
+    :not(pre) > code { color: var(--cyan); background: rgba(40,200,255,.08); padding: 2px 5px; }
+    .copy-button {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      z-index: 3;
+      padding: 7px 10px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: #111823;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: .62rem;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .copy-button:hover { color: var(--orange); border-color: var(--orange); }
+    .docs-table-wrap { overflow-x: auto; margin: 22px 0; }
+    table { width: 100%; border-collapse: collapse; min-width: 560px; }
+    th, td { padding: 12px 14px; border: 1px solid rgba(255,255,255,.1); text-align: left; }
+    th {
+      background: linear-gradient(180deg, #17202b, #111822);
+      color: var(--orange);
+      font-family: var(--display);
+      font-size: .84rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    td { color: #c9ced6; background: rgba(6,9,14,.58); }
+
+    /* ACCORDIONS */
+    .accordion {
+      margin-top: 12px;
+      border: 1px solid rgba(255,255,255,.1);
+      background: linear-gradient(155deg, rgba(16,22,31,.95), rgba(8,12,18,.95));
+    }
+    .accordion summary {
+      cursor: pointer;
+      padding: 16px 18px;
+      color: #f0f2f4;
+      font-family: var(--display);
+      font-size: 1rem;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .accordion summary::marker { color: var(--orange); }
+    .accordion > div { padding: 0 18px 18px; }
+    .accordion p:last-child { margin-bottom: 0; }
+
+    /* END MODULE */
+    #compatibility .hero-actions { margin-top: 25px; }
+
+    footer {
+      padding: 25px 0 36px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      background: rgba(4,7,10,.88);
+    }
+    .footer-inner { display: flex; justify-content: space-between; gap: 28px; align-items: center; }
+    .footer-brand img { width: 132px; height: auto; }
+    .footer-copy { margin: 8px 0 0; color: var(--dim); font-size: .82rem; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 15px; }
+    .footer-links a { color: var(--muted); text-decoration: none; font-family: var(--mono); font-size: .68rem; text-transform: uppercase; }
+    .footer-links a:hover { color: var(--orange); }
+
+    @media (max-width: 980px) {
+      .nav-links { gap: 16px; }
+      .nav-links a { font-size: .68rem; }
+      .docs-hero-inner { grid-template-columns: 1fr; }
+      .manual-status { justify-self: start; margin-bottom: 38px; }
+      .docs-hero-art { width: 82%; opacity: .52; }
+      .docs-layout { grid-template-columns: 220px minmax(0, 1fr); }
+    }
+
+    @media (max-width: 760px) {
+      .container { width: min(100% - 28px, var(--max)); }
+      .site-nav, .nav-inner { min-height: 62px; }
+      .brand img { width: 118px; }
+      .nav-toggle { display: inline-flex; }
+      .nav-links {
+        display: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 62px;
+        padding: 16px 14px 20px;
+        background: rgba(4,8,12,.98);
+        border-bottom: 1px solid rgba(255,255,255,.08);
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links a { padding: 11px 5px; border-bottom: 1px solid rgba(255,255,255,.06); }
+      .nav-launch { justify-content: center; margin-top: 6px; }
+      .docs-hero, .docs-hero-inner { min-height: 560px; }
+      .docs-hero-art { width: 100%; opacity: .42; object-position: 72% center; }
+      .docs-hero::before { background: linear-gradient(90deg, rgba(5,8,13,.98), rgba(5,8,13,.78)); }
+      .docs-hero-copy { padding: 46px 0 28px; }
+      h1 { font-size: clamp(3.7rem, 17vw, 6rem); }
+      .manual-status { width: 100%; margin-bottom: 40px; }
+      .docs-layout { grid-template-columns: 1fr; }
+      .docs-sidebar { position: static; }
+      .docs-sidebar nav { grid-template-columns: 1fr 1fr; gap: 0 12px; }
+      .docs-content > section { padding: 27px 21px 30px; }
+      .quick-steps { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+      body::after { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      .button-row .button, .hero-actions .button { width: 100%; }
+      .docs-sidebar nav { grid-template-columns: 1fr; }
+      .docs-content > section::before { font-size: 3.2rem; right: 16px; }
+      .docs-content h2 { padding-right: 45px; }
+      .status-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: .01ms !important; }
+    }
+  
+
+    /* MOBILE_PERF_OPTIMIZATION */
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      scroll-padding-top: 82px;
+    }
+    body {
+      min-width: 320px;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    img { height: auto; }
+    a, button { touch-action: manipulation; }
+    .site-nav, .docs-hero { isolation: isolate; }
+
+    @media screen {
+      .docs-content > section,
+      footer {
+        content-visibility: auto;
+        contain-intrinsic-size: auto 980px;
+      }
+    }
+
+    .docs-content > section,
+    .doc-shot,
+    .quick-step,
+    .note,
+    .warning,
+    .accordion {
+      contain: layout paint style;
+    }
+
+    .docs-sidebar-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .docs-sidebar-toggle {
+      display: none;
+      min-width: 44px;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: #fff;
+      padding: 8px 11px;
+      font-family: var(--mono);
+      font-size: .66rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .docs-sidebar-toggle::after { content: " +"; color: var(--orange); }
+    .docs-sidebar.open .docs-sidebar-toggle::after { content: " −"; }
+
+    pre,
+    .docs-table-wrap,
+    .docs-sidebar nav {
+      -webkit-overflow-scrolling: touch;
+    }
+    .docs-table-wrap {
+      overscroll-behavior-inline: contain;
+      scrollbar-width: thin;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .button:hover { transform: translateY(-2px); }
+    }
+
+    @media (max-width: 980px) {
+      .docs-layout {
+        grid-template-columns: 196px minmax(0, 1fr);
+        gap: 26px;
+      }
+      .docs-content { min-width: 0; }
+    }
+
+    @media (max-width: 760px) {
+      html { scroll-padding-top: 128px; }
+      body::before { display: none; }
+      .site-nav {
+        background: rgba(4,8,12,.985);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+      }
+      .nav-toggle {
+        min-width: 48px;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+      }
+      .nav-links {
+        position: fixed;
+        top: 62px;
+        max-height: calc(100dvh - 62px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        box-shadow: 0 24px 54px rgba(0,0,0,.55);
+      }
+      .nav-links a {
+        display: flex;
+        align-items: center;
+        min-height: 48px;
+      }
+      .nav-open body { overflow: hidden; }
+      .docs-hero,
+      .docs-hero-inner { min-height: 520px; }
+      .docs-hero-copy { padding: 40px 0 24px; }
+      .docs-hero-art { object-position: 70% center; }
+      h1 {
+        font-size: clamp(3.25rem, 15vw, 5.35rem);
+        overflow-wrap: anywhere;
+      }
+      .manual-status { margin-bottom: 30px; }
+      .docs-stage { padding-top: 18px; }
+      .docs-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      .docs-sidebar {
+        position: sticky;
+        top: 62px;
+        z-index: 70;
+        padding: 9px 12px;
+        background: rgba(7,11,16,.985);
+        box-shadow: 0 12px 28px rgba(0,0,0,.38);
+      }
+      .docs-sidebar::before { display: none; }
+      .docs-sidebar-title { margin: 0; }
+      .docs-sidebar-title::after { content: " / FIELD INDEX"; }
+      .js .docs-sidebar-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .js .docs-sidebar nav { display: none; }
+      .js .docs-sidebar.open nav { display: grid; }
+      .docs-sidebar nav {
+        grid-template-columns: 1fr;
+        gap: 0;
+        max-height: min(58dvh, 500px);
+        margin-top: 10px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+      }
+      .docs-sidebar a {
+        display: flex;
+        align-items: center;
+        min-height: 44px;
+        padding-block: 9px;
+      }
+      .docs-content > section {
+        scroll-margin-top: 132px;
+        padding: 24px 17px 28px;
+        box-shadow: 0 16px 36px rgba(0,0,0,.28);
+      }
+      .docs-content > section + section { margin-top: 18px; }
+      .docs-content p,
+      .docs-content li { overflow-wrap: anywhere; }
+      .doc-shot {
+        margin-inline: -2px;
+        padding: 5px;
+        box-shadow: 0 12px 30px rgba(0,0,0,.28);
+      }
+      .code-wrap { margin-inline: -1px; }
+      pre {
+        max-width: 100%;
+        padding: 17px 13px;
+        font-size: .72rem;
+        line-height: 1.55;
+        overscroll-behavior-inline: contain;
+      }
+      .copy-button {
+        min-width: 44px;
+        min-height: 38px;
+      }
+      th, td { padding: 10px 11px; }
+      .button { min-height: 50px; }
+      .footer-links a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container { width: min(100% - 22px, var(--max)); }
+      .docs-hero,
+      .docs-hero-inner { min-height: 500px; }
+      .docs-hero-copy { padding-top: 34px; }
+      .status-grid { grid-template-columns: 1fr 1fr; }
+      .docs-content > section::before {
+        right: 12px;
+        font-size: 2.9rem;
+      }
+      .docs-content h2 { padding-right: 38px; }
+    }
+
+    @media (prefers-reduced-data: reduce) {
+      body::before,
+      body::after,
+      .docs-content > section::after { display: none; }
+      .docs-content > section,
+      .doc-shot { box-shadow: none; }
+    }
+
+    @media print {
+      .site-nav,
+      .docs-sidebar,
+      footer,
+      .copy-button,
+      .hero-actions,
+      .button-row { display: none !important; }
+      .docs-layout { display: block; }
+      .docs-content > section { content-visibility: visible; }
+    }
+
+  </style>
+<link as="image" fetchpriority="high" href="assets/bayhem-hero-art-530.webp" rel="preload" type="image/webp"/></head>
+<body>
+<a class="skip-link" href="#docs-content">Skip to documentation</a>
+<header class="site-nav">
+<div class="container nav-inner">
+<a aria-label="Drop Zone Ops home" class="brand" href="index.html">
+<img alt="Drop Zone Ops" decoding="async" fetchpriority="high" height="58" src="assets/bayhem-nav-logo.webp" width="149"/>
+</a>
+<button aria-controls="site-links" aria-expanded="false" class="nav-toggle" type="button">Menu</button>
+<nav aria-label="Primary navigation" class="nav-links" id="site-links">
+<a href="index.html#top">Drop Zone Ops</a>
+<a href="index.html#workflow">Workflow</a>
+<a href="index.html#features">Features</a>
+<a href="index.html#commercial-injection">Commercial Injection</a>
+<a aria-current="page" href="docs.html">Docs</a>
+<a href="https://github.com/schwwaaa/drop-zone-ops" rel="noopener" target="_blank">GitHub</a>
+<a class="nav-launch" href="app.html">Launch Builder <span aria-hidden="true">→</span></a>
+</nav>
+</div>
+</header>
+<main>
+<section class="docs-hero">
+<img alt="Explosive Drop Zone Ops emblem and broadcast skyline" class="docs-hero-art" decoding="async" fetchpriority="high" height="482" sizes="(max-width: 760px) 100vw, (max-width: 980px) 80vw, 760px" src="assets/bayhem-hero-art-530.webp" srcset="assets/bayhem-hero-art-320.webp 320w, assets/bayhem-hero-art-530.webp 530w" width="530"/>
+<div class="container docs-hero-inner">
+<div class="docs-hero-copy">
+<p class="eyebrow">Operations manual / field guide</p>
+<h1>Broadcast <span class="orange">Operations Manual.</span></h1>
+<p class="lede">Everything needed to assemble, organize, inject breaks into, and export M3U playlists for VLC or OBS—presented with the same high-impact visual system as the main site.</p>
+<div class="button-row">
+<a class="button primary" href="app.html">Open Builder <span aria-hidden="true">→</span></a>
+<a class="button" href="#quick-start">Quick Start</a>
+</div>
+</div>
+<aside aria-label="Documentation overview" class="manual-status">
+<p class="status-title">Manual Status</p>
+<div class="status-grid">
+<div class="status-cell"><strong>12</strong><span>Core sections</span></div>
+<div class="status-cell"><strong>M3U</strong><span>Primary output</span></div>
+<div class="status-cell"><strong>OBS</strong><span>Playback target</span></div>
+<div class="status-cell"><strong>100%</strong><span>Client-side</span></div>
+</div>
+</aside>
+</div>
+</section>
+<section class="docs-stage">
+<div class="container docs-layout">
+<aside aria-label="Documentation sections" class="docs-sidebar">
+<div class="docs-sidebar-head"><div class="docs-sidebar-title">Contents</div><button aria-controls="docs-toc" aria-expanded="false" class="docs-sidebar-toggle" type="button">Sections</button></div>
+<nav id="docs-toc">
+<a href="#quick-start">Quick Start</a>
+<a href="#adding-media">Adding Media</a>
+<a href="#base-paths">Local Base Paths</a>
+<a href="#organizing">Organizing a Playlist</a>
+<a href="#editing">Editing Entries</a>
+<a href="#importing">Importing CSV / JSON</a>
+<a href="#commercial-injection">Commercial Injection</a>
+<a href="#exporting">Exporting M3U</a>
+<a href="#obs">Using It in OBS</a>
+<a href="#format">M3U Format Reference</a>
+<a href="#troubleshooting">Troubleshooting</a>
+<a href="#compatibility">Compatibility</a>
+</nav>
+</aside>
+<article class="docs-content" id="docs-content">
+<section id="quick-start">
+<p class="eyebrow">Start here</p>
+<h2>Quick Start</h2>
+<p>Drop Zone Ops runs as a static browser application. There is no account, command line, package installation, or server process required.</p>
+<div class="quick-steps">
+<div class="quick-step">Open <a href="app.html">the builder</a>.</div>
+<div class="quick-step">Set a root folder path when using local files.</div>
+<div class="quick-step">Drop media, browse for files, or paste a URL.</div>
+<div class="quick-step">Drag entries into playback order and assign tags.</div>
+<div class="quick-step">Name the playlist and review the M3U preview.</div>
+<div class="quick-step">Click <strong>Export .M3U Playlist</strong>.</div>
+</div>
+<div class="note">
+<strong>Fastest test</strong>
+            Add one local media file, enter its folder in Root Folder Path, name the playlist, export it, and open the resulting file in VLC.
+          </div>
+</section>
+<section id="adding-media">
+<p class="eyebrow">Inputs</p>
+<h2>Adding Media</h2>
+<p>Content can be added several ways. All input methods feed the same ordered playlist, so local files and remote URLs can be mixed in one block.</p>
+<h3>Drop files or folders</h3>
+<p>Drag media from the operating system into the main drop zone. Individual files use the current root folder path as a prefix. Folder drops preserve nested paths when the browser exposes that information.</p>
+<figure class="doc-shot">
+<img alt="Drop files or folders area in Drop Zone Ops" decoding="async" height="550" loading="lazy" sizes="(max-width: 760px) calc(100vw - 72px), (max-width: 980px) calc(100vw - 302px), 850px" src="assets/dropzoneops-dropfiles-896.webp" srcset="assets/dropzoneops-dropfiles-480.webp 480w, assets/dropzoneops-dropfiles-800.webp 800w, assets/dropzoneops-dropfiles-896.webp 896w" width="896">
+<figcaption>The main drop zone accepts media files and supported folder drops.</figcaption>
+</img></figure>
+<h3>Browse local files</h3>
+<p>Click <strong>Browse Local Files</strong> in the Operations panel to open the browser file picker. Multiple files may be selected at once.</p>
+<h3>Paste a remote URL</h3>
+<p>Paste a direct HTTP or HTTPS media URL into the URL field, optionally provide a display name, and click <strong>+ ADD</strong>. Remote URLs pass through unchanged and are never prefixed with the local root path.</p>
+<div class="warning">
+<strong>Direct media URLs</strong>
+            A webpage URL is not necessarily a playable media URL. VLC and OBS need a direct or otherwise accessible path to the media resource.
+          </div>
+</section>
+<section id="base-paths">
+<p class="eyebrow">Local media</p>
+<h2>Local Base Paths</h2>
+<p>Browsers do not expose a full local filesystem path when an ordinary file is selected. Drop Zone Ops solves this by combining the filename with a root path that you provide.</p>
+<figure class="doc-shot">
+<img alt="Root Folder Path field in Drop Zone Ops" decoding="async" height="202" loading="lazy" sizes="(max-width: 760px) calc(100vw - 72px), (max-width: 980px) calc(100vw - 302px), 850px" src="assets/dropzoneops-localbasepath-924.webp" srcset="assets/dropzoneops-localbasepath-480.webp 480w, assets/dropzoneops-localbasepath-800.webp 800w, assets/dropzoneops-localbasepath-924.webp 924w" width="924">
+<figcaption>Set the folder that contains your local media before adding individual files.</figcaption>
+</img></figure>
+<h3>Examples</h3>
+<div class="code-wrap">
+<button class="copy-button" data-copy="paths-example" type="button">Copy</button>
+<pre id="paths-example"><code>macOS / Linux
+/Users/yourname/Videos/content/
+
+Windows
+C:\Users\yourname\Videos\content\</code></pre>
+</div>
+<h3>How the path is applied</h3>
+<ul>
+<li>Individual local files are prefixed with the root folder path.</li>
+<li>Folder drops attempt to preserve their nested relative path.</li>
+<li>Remote HTTP and HTTPS URLs are never changed.</li>
+<li><strong>Apply All</strong> reapplies the current root path to existing local items.</li>
+</ul>
+<div class="warning">
+<strong>The playback machine matters</strong>
+            The exported path must be valid on the computer that will run VLC or OBS. A playlist built on one machine may need different root paths when moved to another.
+          </div>
+</section>
+<section id="organizing">
+<p class="eyebrow">Playlist structure</p>
+<h2>Organizing a Playlist</h2>
+<p>Each row represents one M3U entry. Drag the handle on the left side of a row to change playback order.</p>
+<figure class="doc-shot">
+<img alt="Ordered playlist rows in Drop Zone Ops" decoding="async" height="698" loading="lazy" sizes="(max-width: 760px) calc(100vw - 72px), (max-width: 980px) calc(100vw - 302px), 850px" src="assets/dropzoneops-playlist-938.webp" srcset="assets/dropzoneops-playlist-480.webp 480w, assets/dropzoneops-playlist-800.webp 800w, assets/dropzoneops-playlist-938.webp 938w" width="938"/>
+<figcaption>Rows can be reordered and reviewed alongside live playlist statistics.</figcaption>
+</figure>
+<h3>Tags</h3>
+<p>Click a row's colored tag badge to cycle through content types.</p>
+<div class="docs-table-wrap">
+<table>
+<thead><tr><th>Tag</th><th>Typical use</th></tr></thead>
+<tbody>
+<tr><td><code>content</code></td><td>Main programming, episodes, films, or features</td></tr>
+<tr><td><code>commercial</code></td><td>Advertisements and sponsor spots</td></tr>
+<tr><td><code>bumper</code></td><td>Station IDs, intros, outros, and break transitions</td></tr>
+<tr><td><code>interstitial</code></td><td>Filler, transitions, or short between-program pieces</td></tr>
+<tr><td><code>other</code></td><td>Anything that does not fit the primary categories</td></tr>
+</tbody>
+</table>
+</div>
+<h3>Groups and blocks</h3>
+<p>A group is an optional label written to the <code>group-title</code> attribute in the exported M3U. Examples include <code>block-1</code>, <code>late-night</code>, or <code>ad-break-2</code>.</p>
+<h3>Sort by Tag</h3>
+<p>The Operations panel can group rows by tag. Use this only when that grouped order is the desired playback order; sorting changes the actual playlist sequence.</p>
+<h3>Runtime statistics</h3>
+<p>The right panel shows total item counts, per-tag counts, and calculated runtime. Total time only includes entries that have a valid duration.</p>
+</section>
+<section id="editing">
+<p class="eyebrow">Metadata</p>
+<h2>Editing Entries</h2>
+<p>Click an item's title to open its editor.</p>
+<figure class="doc-shot">
+<img alt="Edit Item dialog in Drop Zone Ops" decoding="async" height="974" loading="lazy" sizes="(max-width: 760px) calc(100vw - 72px), (max-width: 980px) calc(100vw - 302px), 850px" src="assets/dropzoneops-edititem-1034.webp" srcset="assets/dropzoneops-edititem-480.webp 480w, assets/dropzoneops-edititem-800.webp 800w, assets/dropzoneops-edititem-1034.webp 1034w" width="1034"/>
+<figcaption>Change the display name, path, duration, tag, and group for an individual entry.</figcaption>
+</figure>
+<div class="docs-table-wrap">
+<table>
+<thead><tr><th>Field</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>Display Name</td><td>The title written after the comma in the <code>#EXTINF</code> line</td></tr>
+<tr><td>File Path / URL</td><td>The local path or remote media address used for playback</td></tr>
+<tr><td>Duration</td><td>Accepts <code>MM:SS</code> or <code>H:MM:SS</code>, such as <code>22:30</code> or <code>1:04:15</code></td></tr>
+<tr><td>Tag / Type</td><td>Written to the custom <code>tvg-type</code> attribute</td></tr>
+<tr><td>Group / Block</td><td>Written to the <code>group-title</code> attribute</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="importing">
+<p class="eyebrow">Bulk input</p>
+<h2>Importing CSV and JSON</h2>
+<p>Use <strong>Import CSV / JSON</strong> when a programming plan already exists in a spreadsheet, script output, or data file.</p>
+<figure class="doc-shot">
+<img alt="Import CSV and JSON operation in Drop Zone Ops" decoding="async" height="1168" loading="lazy" sizes="(max-width: 760px) calc(100vw - 72px), (max-width: 980px) calc(100vw - 302px), 850px" src="assets/dropzoneops-csvjsonimport-754.webp" srcset="assets/dropzoneops-csvjsonimport-480.webp 480w, assets/dropzoneops-csvjsonimport-754.webp 754w" width="754"/>
+<figcaption>Import structured playlist data from a local file.</figcaption>
+</figure>
+<h3>CSV format</h3>
+<p>The accepted header names are <code>path</code>, <code>name</code>, <code>duration</code>, <code>tag</code>, and <code>group</code>.</p>
+<div class="code-wrap">
+<button class="copy-button" data-copy="csv-example" type="button">Copy</button>
+<pre id="csv-example"><code>path,name,duration,tag,group
+/Users/yourname/Videos/episode-01.mp4,Episode 01,22:30,content,block-1
+https://media.example.com/ad.mp4,Soda Ad,0:30,commercial,ad-break-1</code></pre>
+</div>
+<p><a download="" href="playlist-template.csv">Download the CSV template</a>.</p>
+<h3>JSON format</h3>
+<div class="code-wrap">
+<button class="copy-button" data-copy="json-import-example" type="button">Copy</button>
+<pre id="json-import-example"><code>[
+  {
+    "path": "/Users/yourname/Videos/episode-01.mp4",
+    "name": "Episode 01",
+    "duration": "22:30",
+    "tag": "content",
+    "group": "block-1"
+  },
+  {
+    "path": "https://media.example.com/ad.mp4",
+    "name": "Soda Ad",
+    "duration": "0:30",
+    "tag": "commercial",
+    "group": "ad-break-1"
+  }
+]</code></pre>
+</div>
+<p><a download="" href="playlist-template.json">Download the JSON template</a>.</p>
+<div class="note">
+<strong>Duration values</strong>
+            Imported durations may be supplied in readable time format. Empty or unknown durations are allowed, but they will not contribute to the total runtime calculation.
+          </div>
+</section>
+<section id="commercial-injection">
+<p class="eyebrow">Automated breaks</p>
+<h2>Commercial Injection</h2>
+<p>The Commercial Injection panel merges a content playlist with commercials and bumpers according to reusable rules. It can read the current playlist or import a separate M3U or JSON content source.</p>
+<figure class="doc-shot">
+<img alt="Complete Commercial Injection panel" decoding="async" height="1710" loading="lazy" sizes="(max-width: 760px) calc(100vw - 72px), (max-width: 980px) calc(100vw - 302px), 850px" src="assets/dropzoneops-comminjectiondetail-1440.webp" srcset="assets/dropzoneops-comminjectiondetail-480.webp 480w, assets/dropzoneops-comminjectiondetail-800.webp 800w, assets/dropzoneops-comminjectiondetail-1200.webp 1200w, assets/dropzoneops-comminjectiondetail-1440.webp 1440w" width="2414"/>
+<figcaption>The panel contains a commercial library, rule editor, JSON template, and merged preview.</figcaption>
+</figure>
+<h3>1. Build the commercial library</h3>
+<p>Set an optional library base path, then add commercial files by filename, full local path, or remote URL. Each clip can have a display name and duration.</p>
+<figure class="doc-shot">
+<img alt="Commercial library controls" decoding="async" height="405" loading="lazy" sizes="(max-width: 760px) calc(100vw - 72px), (max-width: 980px) calc(100vw - 302px), 850px" src="assets/dropzoneops-comminjection-comlibrary-611.webp" srcset="assets/dropzoneops-comminjection-comlibrary-480.webp 480w, assets/dropzoneops-comminjection-comlibrary-611.webp 611w" width="611"/>
+<figcaption>Files in the library can also be selected as pre- or post-break bumpers.</figcaption>
+</figure>
+<h3>2. Choose the content source</h3>
+<p>By default, the injector reads the current Drop Zone Ops playlist. Use <strong>Import .M3U</strong> to operate on an external content playlist instead.</p>
+<h3>3. Configure the default rule</h3>
+<p>The default rule fires every specified number of content items. It controls the minimum and maximum number of commercials in each break and the selection method.</p>
+<figure class="doc-shot">
+<img alt="Default and override rule controls in Commercial Injection" decoding="async" height="871" loading="lazy" sizes="(max-width: 760px) calc(100vw - 72px), (max-width: 980px) calc(100vw - 302px), 850px" src="assets/dropzoneops-comminjectiondetail-rules-1129.webp" srcset="assets/dropzoneops-comminjectiondetail-rules-480.webp 480w, assets/dropzoneops-comminjectiondetail-rules-800.webp 800w, assets/dropzoneops-comminjectiondetail-rules-1129.webp 1129w" width="1129"/>
+<figcaption>Default rules can be supplemented by position-specific overrides.</figcaption>
+</figure>
+<div class="docs-table-wrap">
+<table>
+<thead><tr><th>Selection</th><th>Behavior</th></tr></thead>
+<tbody>
+<tr><td><code>random</code></td><td>Selects clips randomly from the available commercial library</td></tr>
+<tr><td><code>sequential</code></td><td>Cycles through the commercial library in order across breaks</td></tr>
+<tr><td><code>pool</code></td><td>Uses the configured pool behavior exposed by the current builder interface</td></tr>
+<tr><td><code>specific</code></td><td>May be represented in imported templates that name exact clips</td></tr>
+</tbody>
+</table>
+</div>
+<h3>4. Add position overrides</h3>
+<p>An override applies a different rule after a specific content item. This can create a longer first break, a sponsor-specific block, or a different bumper sequence at a known point in the program.</p>
+<h3>5. Assign bumpers</h3>
+<p>Enable a pre-break bumper, post-break bumper, or both. A pre-break clip might announce an upcoming break; a post-break clip might identify the station or return to programming.</p>
+<h3>6. Review or edit the JSON template</h3>
+<p>The live JSON representation can be unlocked with <strong>Edit</strong>, validated and locked again, saved for reuse, or replaced with an imported template.</p>
+<figure class="doc-shot">
+<img alt="JSON template panel for commercial injection" decoding="async" height="679" loading="lazy" sizes="(max-width: 760px) calc(100vw - 72px), (max-width: 980px) calc(100vw - 302px), 850px" src="assets/dropzoneops-comminjectiondetail-jsontemplate-651.webp" srcset="assets/dropzoneops-comminjectiondetail-jsontemplate-480.webp 480w, assets/dropzoneops-comminjectiondetail-jsontemplate-651.webp 651w" width="651"/>
+<figcaption>Save a known rule set and load it again in a later session.</figcaption>
+</figure>
+<h3>7. Inject and update</h3>
+<p>Review the merged preview, then click <strong>Inject &amp; Update Playlist</strong>. The merged result replaces the active playlist in the main builder. Export it normally after verifying the order.</p>
+<details class="accordion">
+<summary>Commercial Injection JSON template example</summary>
+<div>
+<div class="code-wrap">
+<button class="copy-button" data-copy="injection-template" type="button">Copy</button>
+<pre id="injection-template"><code>{
+  "name": "saturday-night-block",
+  "commercial_library": {
+    "source": "/Users/yourname/Videos/commercials/",
+    "files": [
+      { "name": "Soda Ad", "path": "soda-ad.mp4", "duration": "0:30" },
+      { "name": "Car Ad", "path": "car-ad.mp4", "duration": "0:30" },
+      { "name": "And We're Back", "path": "back-bumper.mp4", "duration": "0:08" }
+    ]
+  },
+  "breaks": {
+    "default_interval": 2,
+    "min_ads": 1,
+    "max_ads": 2,
+    "selection": "random",
+    "default_bumpers": {
+      "post": "/Users/yourname/Videos/commercials/back-bumper.mp4"
+    },
+    "overrides": [
+      {
+        "after_item": 1,
+        "min_ads": 2,
+        "max_ads": 2,
+        "selection": "sequential",
+        "bumpers": {
+          "pre": "/Users/yourname/Videos/commercials/into-break.mp4",
+          "post": "/Users/yourname/Videos/commercials/back-bumper.mp4"
+        }
+      }
+    ]
+  }
+}</code></pre>
+</div>
+</div>
+</details>
+</section>
+<section id="exporting">
+<p class="eyebrow">Output</p>
+<h2>Exporting M3U</h2>
+<p>Enter a value in <strong>Playlist Name</strong> and click <strong>Export .M3U Playlist</strong>. The browser downloads a file using that name.</p>
+<figure class="doc-shot">
+<img alt="Playlist name field and Export M3U Playlist button" decoding="async" height="804" loading="lazy" sizes="(max-width: 760px) calc(100vw - 72px), (max-width: 980px) calc(100vw - 302px), 850px" src="assets/dropzoneops-exportnamedm3u-756.webp" srcset="assets/dropzoneops-exportnamedm3u-480.webp 480w, assets/dropzoneops-exportnamedm3u-756.webp 756w" width="756"/>
+<figcaption>For example, <code>saturday-night-block</code> exports as <code>saturday-night-block.m3u</code>.</figcaption>
+</figure>
+<h3>Before exporting</h3>
+<ul>
+<li>Verify that every local path is valid on the playback machine.</li>
+<li>Confirm the final row order because that is the playback order.</li>
+<li>Check that remote URLs are directly accessible.</li>
+<li>Review the M3U preview for unexpected metadata or paths.</li>
+</ul>
+</section>
+<section id="obs">
+<p class="eyebrow">Playback</p>
+<h2>Using the Playlist in OBS</h2>
+<ol>
+<li>Install VLC on the OBS machine if it is not already available.</li>
+<li>In OBS, add a new <strong>VLC Video Source</strong>.</li>
+<li>Use the plus button beneath its playlist and choose <strong>Add Path/URL</strong>.</li>
+<li>Select the exported <code>.m3u</code> file.</li>
+<li>Confirm that OBS can resolve every local path and remote URL in the playlist.</li>
+</ol>
+<figure class="doc-shot">
+<img alt="OBS VLC Video Source configuration with a playlist path" decoding="async" height="1888" loading="lazy" sizes="(max-width: 760px) calc(100vw - 72px), (max-width: 980px) calc(100vw - 302px), 850px" src="assets/dropzoneops-obs-1440.webp" srcset="assets/dropzoneops-obs-480.webp 480w, assets/dropzoneops-obs-800.webp 800w, assets/dropzoneops-obs-1200.webp 1200w, assets/dropzoneops-obs-1440.webp 1440w" width="3024"/>
+<figcaption>Load the exported M3U into the VLC Video Source playlist.</figcaption>
+</figure>
+<div class="note">
+<strong>OBS formatting</strong>
+            The builder exports the playlist without an unwanted trailing newline because the OBS VLC source can be strict about file formatting.
+          </div>
+</section>
+<section id="format">
+<p class="eyebrow">Reference</p>
+<h2>M3U Format</h2>
+<p>The export uses Extended M3U. The file begins with <code>#EXTM3U</code>. Each media item is represented by a metadata line followed by its path or URL.</p>
+<div class="code-wrap">
+<button class="copy-button" data-copy="m3u-example" type="button">Copy</button>
+<pre id="m3u-example"><code>#EXTM3U
+#EXTINF:1350 group-title="block-1" tvg-type="content",Episode 01
+/Users/yourname/Videos/episode-01.mp4
+#EXTINF:30 group-title="ad-break-1" tvg-type="commercial",Soda Ad
+https://media.example.com/ad.mp4
+#EXTINF:8 group-title="ad-break-1" tvg-type="bumper",And We're Back
+/Users/yourname/Videos/back-bumper.mp4</code></pre>
+</div>
+<div class="docs-table-wrap">
+<table>
+<thead><tr><th>Drop Zone Ops field</th><th>M3U output</th></tr></thead>
+<tbody>
+<tr><td>Duration</td><td>The number after <code>#EXTINF:</code>, in seconds</td></tr>
+<tr><td>Display Name</td><td>The title after the comma</td></tr>
+<tr><td>Tag</td><td>The custom <code>tvg-type</code> attribute</td></tr>
+<tr><td>Group</td><td>The <code>group-title</code> attribute</td></tr>
+<tr><td>File Path / URL</td><td>The line immediately following the metadata</td></tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="troubleshooting">
+<p class="eyebrow">Problems</p>
+<h2>Troubleshooting</h2>
+<details class="accordion" open="">
+<summary>The playlist loads, but local media cannot be found</summary>
+<div><p>Open the exported M3U in a text editor and inspect the media paths. Confirm that the root folder matches the playback computer, the filenames are correct, and Windows/macOS path conventions are not mixed.</p></div>
+</details>
+<details class="accordion">
+<summary>A remote URL does not play</summary>
+<div><p>Test the URL directly in VLC. It may point to a webpage, require authentication, expire, redirect in an unsupported way, or block access from the playback software.</p></div>
+</details>
+<details class="accordion">
+<summary>Total Time is incomplete</summary>
+<div><p>The runtime is calculated only from entries with valid duration values. Edit missing entries and use <code>MM:SS</code> or <code>H:MM:SS</code>.</p></div>
+</details>
+<details class="accordion">
+<summary>CSV fields are not recognized</summary>
+<div><p>Use the exact header names <code>path,name,duration,tag,group</code>. Save the file as a standard comma-separated UTF-8 CSV and quote values that contain commas.</p></div>
+</details>
+<details class="accordion">
+<summary>The Commercial Injection template fails to lock or import</summary>
+<div><p>Validate that the file contains valid JSON: double-quoted keys and strings, no comments, no trailing commas, and properly balanced braces and brackets.</p></div>
+</details>
+<details class="accordion">
+<summary>OBS does not reflect a replaced playlist immediately</summary>
+<div><p>Refresh or recreate the VLC source, or remove and re-add the M3U path. Some OBS/VLC source states may cache the previous playlist contents.</p></div>
+</details>
+<details class="accordion">
+<summary>Folder dropping behaves differently in another browser</summary>
+<div><p>Folder traversal depends on browser file APIs. Use a Chromium-based browser for the strongest folder-drop support, or add individual files and apply the root path manually.</p></div>
+</details>
+</section>
+<section id="compatibility">
+<p class="eyebrow">Environment</p>
+<h2>Compatibility</h2>
+<p>The project has been tested on macOS Apple Silicon, Windows 10/11, and Ubuntu 24.04. It is designed for modern Chrome, Firefox, Safari, and Edge.</p>
+<div class="warning">
+<strong>Local file security</strong>
+            Browser behavior can differ when opening <code>app.html</code> directly from disk versus serving the folder from a static web host. Core playlist building is designed to work as a local file, but browser privacy controls may affect some folder APIs.
+          </div>
+<div class="hero-actions">
+<a class="button button-primary" href="app.html">Launch Builder</a>
+<a class="button button-secondary" href="https://github.com/schwwaaa/drop-zone-ops" rel="noopener" target="_blank">Project Repository</a>
+</div>
+</section>
+</article>
+</div>
+</section>
+</main>
+<footer>
+<div class="container footer-inner">
+<div>
+<a class="footer-brand" href="index.html"><img alt="Drop Zone Ops" decoding="async" height="58" loading="lazy" src="assets/bayhem-nav-logo.webp" width="149"/></a>
+<p class="footer-copy">Static documentation for the client-side M3U playlist builder.</p>
+</div>
+<nav aria-label="Footer navigation" class="footer-links">
+<a href="index.html">Landing Page</a>
+<a href="app.html">Builder</a>
+<a download="" href="playlist-template.csv">CSV Template</a>
+<a download="" href="playlist-template.json">JSON Template</a>
+</nav>
+</div>
+</footer>
+<script defer="" src="site.js"></script>
+</body>
+</html>
