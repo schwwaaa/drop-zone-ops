@@ -3,9 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DROP ZONE OPS</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Share+Tech+Mono&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<title>Drop Zone Ops — Playlist Builder</title>
 <style>
   :root {
     --orange: #FF4500;
@@ -27,7 +25,7 @@
   body {
     background: var(--dark);
     color: var(--text);
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'Arial Narrow', 'Roboto Condensed', Arial, sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
   }
@@ -51,9 +49,9 @@
   /* ── HEADER ── */
   .header {
     position: relative;
-    background-image: url('https://ultimateactionmovies.com/wp-content/uploads/2022/09/Drop-Zone-Movie-696x464.jpg');
+    background-image: url('/assets/bayhem-hero-art.png');
     background-size: cover;
-    background-position: center 30%;
+    background-position: center 75%;
     border-bottom: 3px solid var(--orange);
     padding: 3rem 2rem 2rem;
     text-align: center;
@@ -67,7 +65,7 @@
   }
   .header-inner { position: relative; z-index: 2; }
   .logo {
-    font-family: 'Russo One', sans-serif;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     font-size: clamp(3rem, 8vw, 6rem);
     color: var(--orange);
     text-shadow: 0 0 40px var(--orange-glow), 2px 2px 0 #000;
@@ -75,7 +73,7 @@
     line-height: 1;
   }
   .tagline {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     color: var(--text-dim);
     font-size: 0.85rem;
     letter-spacing: 3px;
@@ -89,7 +87,7 @@
     margin-top: 1rem;
   }
   .status-pill {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.7rem;
     letter-spacing: 2px;
     padding: 4px 12px;
@@ -124,7 +122,7 @@
     padding: 14px 20px;
     background: var(--dark2);
     border-bottom: 2px solid var(--border);
-    font-family: 'Russo One', sans-serif;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     font-size: 0.75rem;
     letter-spacing: 3px;
     color: var(--orange);
@@ -164,7 +162,7 @@
   .dropzone-area.drag-over { border-style: solid; }
   .dz-icon { font-size: 3rem; margin-bottom: 12px; display: block; }
   .dz-label {
-    font-family: 'Russo One', sans-serif;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     font-size: 1rem;
     letter-spacing: 2px;
     color: var(--text-dim);
@@ -174,7 +172,7 @@
     font-size: 0.8rem;
     color: #555566;
     margin-top: 6px;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
   }
 
   /* ── URL INPUT ── */
@@ -189,7 +187,7 @@
     border: 1px solid var(--border);
     border-radius: 3px;
     color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.8rem;
     padding: 10px 14px;
     outline: none;
@@ -203,7 +201,7 @@
     border: 1px solid var(--border);
     border-radius: 3px;
     color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.8rem;
     padding: 10px 10px;
     outline: none;
@@ -222,7 +220,7 @@
     text-align: center;
     padding: 40px 20px;
     color: #333344;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.85rem;
     letter-spacing: 2px;
   }
@@ -256,7 +254,7 @@
 
   .item-info { min-width: 0; }
   .item-name {
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'Arial Narrow', 'Roboto Condensed', Arial, sans-serif;
     font-weight: 600;
     font-size: 0.95rem;
     color: var(--text);
@@ -267,7 +265,7 @@
   }
   .item-name:hover { color: var(--orange); }
   .item-name-edit {
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'Arial Narrow', 'Roboto Condensed', Arial, sans-serif;
     font-weight: 600;
     font-size: 0.95rem;
     background: var(--dark);
@@ -279,7 +277,7 @@
     outline: none;
   }
   .item-meta {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.65rem;
     color: var(--text-dim);
     margin-top: 2px;
@@ -289,7 +287,7 @@
   }
 
   .item-tag {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.6rem;
     letter-spacing: 1px;
     padding: 2px 7px;
@@ -321,7 +319,7 @@
   .item-num {
     position: absolute;
     top: 3px; left: 3px;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.55rem;
     color: #333344;
   }
@@ -346,7 +344,7 @@
     align-items: center;
     gap: 10px;
     padding: 12px 16px;
-    font-family: 'Russo One', sans-serif;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     font-size: 0.75rem;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -379,7 +377,7 @@
   /* ── IMPORT PANEL ── */
   .import-section { padding: 16px; border-bottom: 2px solid var(--border); }
   .import-label {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.65rem;
     color: var(--text-dim);
     letter-spacing: 2px;
@@ -393,14 +391,14 @@
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.72rem;
     color: #444455;
     letter-spacing: 1px;
   }
   .import-drop:hover { border-color: var(--cyan); color: var(--cyan); }
   .import-format {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.6rem;
     color: #333344;
     margin-top: 8px;
@@ -419,13 +417,13 @@
   }
   .stat-row:last-child { border-bottom: none; }
   .stat-label {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.65rem;
     color: var(--text-dim);
     letter-spacing: 1px;
   }
   .stat-val {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.75rem;
     color: var(--orange);
     font-weight: bold;
@@ -438,7 +436,7 @@
     border: 1px solid var(--border);
     border-radius: 3px;
     padding: 12px;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.65rem;
     color: #555566;
     line-height: 1.6;
@@ -459,7 +457,7 @@
     border: 1px solid var(--orange);
     border-radius: 4px;
     padding: 12px 24px;
-    font-family: 'Russo One', sans-serif;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     font-size: 0.75rem;
     letter-spacing: 2px;
     color: var(--orange);
@@ -495,7 +493,7 @@
     overflow-y: auto;
   }
   .modal h3 {
-    font-family: 'Russo One', sans-serif;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     font-size: 0.85rem;
     letter-spacing: 3px;
     color: var(--orange);
@@ -515,7 +513,7 @@
   .form-row { margin-bottom: 14px; }
   .form-label {
     display: block;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.65rem;
     letter-spacing: 2px;
     color: var(--text-dim);
@@ -528,7 +526,7 @@
     border: 1px solid var(--border);
     border-radius: 3px;
     color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.8rem;
     padding: 10px 12px;
     outline: none;
@@ -545,7 +543,7 @@
     flex-wrap: wrap;
   }
   .tag-opt {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.65rem;
     letter-spacing: 1px;
     padding: 4px 10px;
@@ -577,7 +575,7 @@
     gap: 7px;
     margin-top: 14px;
     padding: 8px 20px;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.7rem;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -593,7 +591,7 @@
     color: var(--text);
     background: rgba(255,69,0,0.08);
   }
-  .about-btn::before { content: '?'; font-family: 'Russo One', sans-serif; color: var(--orange); }
+  .about-btn::before { content: '?'; font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; color: var(--orange); }
 
   /* ── ABOUT MODAL ── */
   .about-modal {
@@ -608,7 +606,7 @@
     overflow-y: auto;
   }
   .about-modal h3 {
-    font-family: 'Russo One', sans-serif;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     font-size: 1.1rem;
     letter-spacing: 3px;
     color: var(--orange);
@@ -616,7 +614,7 @@
     margin-bottom: 6px;
   }
   .about-modal .about-sub {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.7rem;
     color: var(--text-dim);
     letter-spacing: 2px;
@@ -625,7 +623,7 @@
     border-bottom: 1px solid var(--border);
   }
   .about-modal p {
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'Arial Narrow', 'Roboto Condensed', Arial, sans-serif;
     font-size: 1rem;
     color: var(--text);
     line-height: 1.7;
@@ -645,7 +643,7 @@
     align-items: center;
     gap: 6px;
     padding: 9px 16px;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.7rem;
     letter-spacing: 1px;
     text-decoration: none;
@@ -706,7 +704,7 @@
     border-bottom: 2px solid var(--border);
   }
   .injector-title {
-    font-family: 'Russo One', sans-serif;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     font-size: 0.9rem;
     letter-spacing: 3px;
     color: var(--cyan);
@@ -720,7 +718,7 @@
     cursor: pointer;
     padding: 6px 12px;
     border-radius: 3px;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     transition: all 0.15s;
   }
   .injector-close:hover { border-color: var(--orange); color: var(--orange); }
@@ -743,7 +741,7 @@
     padding: 12px 16px;
     background: var(--dark2);
     border-bottom: 1px solid var(--border);
-    font-family: 'Russo One', sans-serif;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
     font-size: 0.65rem;
     letter-spacing: 3px;
     color: var(--orange);
@@ -775,7 +773,7 @@
   }
   .lib-item:hover { border-color: var(--cyan); }
   .lib-item-name {
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'Arial Narrow', 'Roboto Condensed', Arial, sans-serif;
     font-weight: 600;
     font-size: 0.85rem;
     flex: 1;
@@ -785,7 +783,7 @@
     white-space: nowrap;
   }
   .lib-item-dur {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.6rem;
     color: var(--cyan);
     white-space: nowrap;
@@ -808,7 +806,7 @@
   .rule-card.is-default { border-color: var(--orange); }
   .rule-card.is-override { border-color: #ffc800; }
   .rule-badge {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.58rem;
     letter-spacing: 1px;
     padding: 2px 7px;
@@ -834,7 +832,7 @@
     flex-wrap: wrap;
   }
   .rule-label {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.6rem;
     color: var(--text-dim);
     letter-spacing: 1px;
@@ -847,7 +845,7 @@
     border: 1px solid var(--border);
     border-radius: 2px;
     color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.75rem;
     padding: 5px 8px;
     outline: none;
@@ -860,7 +858,7 @@
     border: 1px solid var(--border);
     border-radius: 2px;
     color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.7rem;
     padding: 5px 8px;
     outline: none;
@@ -890,7 +888,7 @@
     border: 1px solid var(--border);
     border-radius: 2px;
     color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.65rem;
     padding: 4px 6px;
     outline: none;
@@ -898,7 +896,7 @@
     min-width: 0;
   }
   .bumper-label {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.6rem;
     color: var(--cyan);
     white-space: nowrap;
@@ -912,7 +910,7 @@
     border: none;
     border-radius: 0;
     color: #7ec8e3;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.65rem;
     line-height: 1.6;
     padding: 14px;
@@ -932,7 +930,7 @@
   .cp-item {
     padding: 5px 8px;
     border-radius: 2px;
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.62rem;
     display: flex;
     align-items: center;
@@ -954,7 +952,7 @@
     gap: 12px;
   }
   .injector-status {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.65rem;
     color: var(--text-dim);
     letter-spacing: 1px;
@@ -973,7 +971,7 @@
     flex-wrap: wrap;
   }
   .footer-left {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.6rem;
     color: #333344;
     letter-spacing: 2px;
@@ -987,7 +985,7 @@
     flex-wrap: wrap;
   }
   .footer-link {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
     font-size: 0.65rem;
     letter-spacing: 1px;
     text-decoration: none;
@@ -1009,9 +1007,103 @@
     .left-panel { border-right: none; border-bottom: 2px solid var(--border); }
     .footer { justify-content: center; text-align: center; }
   }
+
+  /* ── SITE NAVIGATION ── */
+  .builder-topbar {
+    position: relative;
+    z-index: 10000;
+    min-height: 48px;
+    padding: 0 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+    background: #07080c;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  }
+  .builder-home {
+    color: var(--orange);
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    white-space: nowrap;
+  }
+  .builder-links { display: flex; align-items: center; gap: 8px; }
+  .builder-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 0.62rem;
+    letter-spacing: 1.5px;
+    border: 1px solid var(--border);
+    padding: 6px 9px;
+  }
+  .builder-links a:hover { color: var(--orange); border-color: var(--orange); }
+  .builder-links a.active { color: var(--green); border-color: var(--green); }
+  @media (max-width: 580px) {
+    .builder-topbar { padding: 8px 10px; align-items: flex-start; }
+    .builder-links { flex-wrap: wrap; justify-content: flex-end; }
+    .builder-links a { font-size: 0.56rem; padding: 5px 7px; }
+  }
+
+        .schwwaaa-footer {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            padding: 28px 0 36px;
+            text-align: center;
+            font-family: "Audiowide", sans-serif;
+        }
+
+        .schwwaaa-footer-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .schwwaaa-footer-image {
+            display: block;
+            width: min(168px, 44vw);
+            height: auto;
+            object-fit: contain;
+            opacity: 0.9;
+            filter: drop-shadow(0 0 12px rgba(255,255,255,0.22))
+                    drop-shadow(0 0 22px rgba(13,110,253,0.18));
+            transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .schwwaaa-footer-logo:hover .schwwaaa-footer-image {
+            opacity: 1;
+            transform: translateY(-1px);
+            filter: drop-shadow(0 0 14px rgba(255,255,255,0.35))
+                    drop-shadow(0 0 28px rgba(13,110,253,0.32));
+        }
+
+        .schwwaaa-footer-label {
+            display: block;
+            margin-top: 8px;
+            color: rgba(255,255,255,0.54);
+            font-size: 0.58rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }/  
+
 </style>
 </head>
 <body>
+
+<nav class="builder-topbar" aria-label="Project navigation">
+  <a class="builder-home" href="index.html">← Drop Zone Ops Home</a>
+  <div class="builder-links">
+    <a class="active" href="app.html" aria-current="page">Builder</a>
+    <a href="docs.html">Documentation</a>
+    <a href="https://github.com/schwwaaa/drop-zone-ops" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</nav>
+
 
 <!-- HEADER -->
 <div class="header">
@@ -1189,6 +1281,8 @@
     <span class="footer-clock" id="clock"></span>
   </div>
   <div class="footer-links">
+    <a class="footer-link highlight" href="index.html">⌂ Landing</a>
+    <a class="footer-link" href="docs.html">▤ Docs</a>
     <a class="footer-link highlight" href="https://schwwaaa.net" target="_blank" rel="noopener">🪂 schwwaaa</a>
     <a class="footer-link" href="https://subcarrier.tv" target="_blank" rel="noopener">📡 subcarrier.tv</a>
     <a class="footer-link" href="https://github.com/cyberboy666/obs_scheduler" target="_blank" rel="noopener">⚙ obs_scheduler</a>
@@ -2453,5 +2547,10 @@
   // ── INIT ──
   render();
 </script>
+<footer class="schwwaaa-footer" aria-label="schwwaaa footer logo">
+    <a class="schwwaaa-footer-logo" href="https://linktr.ee/schwwaaa" target="_blank" rel="noopener noreferrer">
+        <img class="schwwaaa-footer-image" src="./assets/schwwaaa-logo.png" alt="schwwaaa">
+    </a>
+</footer>
 </body>
 </html>

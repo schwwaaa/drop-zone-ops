@@ -1,124 +1,195 @@
-<p align="center">
-  <img width="300px" height="950px" src="https://github.com/user-attachments/assets/e3551d8c-dce3-4b38-be46-631013c78e06"/>  
-</p>
+<div align="center">
 
-<p align="center"><em>Taking automation to new heights!</em></p>
+<img src="assets/icon.png" alt="Drop Zone Ops icon" width="150">
 
 # Drop Zone Ops
 
-**A client-side M3U playlist builder for DIY broadcasters.**
+### Build broadcast-ready M3U playlists without touching a text editor.
 
-Drop Zone Ops is a single-file web app that makes building `.m3u` playlists accessible to anyone — no server, no installation, no command line. Open the file in a browser and start building.
+A visual, client-side playlist operations tool for assembling local and remote media, organizing programming blocks, automating commercial breaks, and exporting clean M3U playlists for VLC, OBS, and compatible players.
 
-It was created to support the DIY broadcast workflows behind [schwwaaa](https://schwwaaa.net/) and [subcarrier.tv](https://subcarrier.tv/) — two community-run streaming channels that needed a simple way to assemble custom playlists with interstitial breaks, commercial bumpers, and mixed local/remote content, then hand them off to OBS with VLC as a source.
+[![Static App](https://img.shields.io/badge/app-static-ff5a16?style=for-the-badge)](#run-locally)
+[![Client Side](https://img.shields.io/badge/processing-client--side-28c8ff?style=for-the-badge)](#privacy-and-security)
+[![M3U Export](https://img.shields.io/badge/output-M3U-4ff0c1?style=for-the-badge)](#m3u-output)
+[![OBS + VLC](https://img.shields.io/badge/playback-OBS%20%2B%20VLC-f6f6f6?style=for-the-badge)](#playback-targets)
+
+[Open the Builder](app.html) · [Read the Documentation](docs.html) · [View the Landing Page](index.html)
+
+</div>
 
 ---
 
-## Why does this exist?
+## What it does
 
-Building an `.m3u` playlist by hand in a text editor is confusing, error-prone, and inaccessible to collaborators who aren't comfortable with file paths and formatting. At the same time, most playlist tools are either bloated, server-dependent, or don't support the mixed local + remote file workflows that DIY streaming actually requires.
+Drop Zone Ops turns playlist construction into a visual workflow:
 
-Drop Zone Ops solves that. It's a drag-and-drop playlist builder that outputs a clean, correctly formatted `.m3u` file that works in both VLC and OBS's VLC source plugin — no trailing newline issues, no path headaches.
+1. **Drop** local files and folders or add remote media URLs.
+2. **Arrange** content into the exact order you want.
+3. **Tag and group** entries as content, commercials, bumpers, interstitials, or custom blocks.
+4. **Inject breaks** using reusable rules and commercial libraries.
+5. **Export** a clean Extended M3U playlist ready for playback.
+
+The project is designed for DIY broadcasting, archival channels, scheduled media playback, internet radio/TV experiments, live production support, and anyone who needs repeatable playlist assembly without editing M3U files manually.
 
 ---
 
-## How it works
+## Why Drop Zone Ops
 
-### 1. Open the app
+Most playlist tools either expose raw text, hide important path behavior, or assume a narrow media workflow. Drop Zone Ops keeps the process visible and controllable.
 
-Just open `index.html` in any modern browser. No server needed. No install. Works on Mac, Windows, and Linux.
+- No account
+- No build step
+- No backend
+- No database
+- No media upload
+- No command-line requirement for normal use
+- Local and remote media in the same playlist
+- Drag-and-drop ordering
+- Root-path handling for local files
+- CSV and JSON import
+- Commercial and bumper injection
+- Human-readable M3U preview
+- Reusable templates
+- OBS and VLC-oriented export
 
-### 2. Set your local base path
-<p align="left">
-  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-localbasepath.png?raw=true"/>  
-</p>
+---
 
-If you're using local video files, set your **Base Path** at the top of the left panel before adding files.
+## Interface
 
-This is the folder where your video files live on your machine:
+### Playlist Builder
 
-- **Mac / Linux:** `/Users/yourname/Videos/content/`
-- **Windows:** `C:\Users\yourname\Videos\content\`
+<img src="assets/dropzoneops-playlist-938.webp" alt="Drop Zone Ops playlist builder interface">
 
-Every local file you drop in will automatically be prefixed with this path in the exported `.m3u`. If you add files before setting the path, hit **APPLY ALL** to apply it retroactively.
+Build, reorder, tag, group, rename, and inspect playlist entries in one visual workspace.
 
-> Remote URLs (Dropbox, S3, HTTP links) are never affected by the base path — they pass through exactly as-is.
+### Commercial Injection
 
-### 3. Add files to your playlist
-<p align="left">
-  <img width="40%" height="40%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-dropfiles.png?raw=true"/>  
-</p>
+<img src="assets/dropzoneops-comminjectiondetail-1440.webp" alt="Drop Zone Ops commercial injection interface">
 
-Three ways to add content:
+Create a commercial library, define default break behavior, add position-specific overrides, assign pre/post bumpers, inspect the merged result, and update the active playlist.
 
-**Drop files** — Drag video files directly from your file manager into the drop zone. They'll appear in the playlist list immediately.
+---
 
-**Browse** — Click **Browse Local Files** to open a file picker.
+## Run locally
 
-**Paste a URL** — For remote files, paste any HTTP/HTTPS URL into the URL field, give it a display name, and click **+ ADD** or hit Enter.
+Drop Zone Ops is a static browser application.
 
-### 4. Arrange your playlist
-<p align="left">
-  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-playlist.png?raw=true"/>  
-</p>
+### Option 1 — open directly
 
-Drag items up and down by the **⠿** handle on the left side of each row. This is where Drop Zone Ops earns its keep — you can build a custom broadcast block with interstitials, ad breaks, and bumpers exactly where you want them.
+Open:
 
-### 5. Tag your content
-<p align="left">
-  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-modifycategory.png?raw=true"/>  
-</p>
+```text
+index.html
+```
 
-Each item has a **tag** that categorizes its role in the playlist:
+Then launch the builder from the landing page.
 
-| Tag | Use case |
+### Option 2 — use a local web server
+
+Python:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then open:
+
+```text
+http://localhost:8000
+```
+
+A local server is recommended when testing browser behavior across multiple pages and assets.
+
+---
+
+## Core workflow
+
+```text
+Local files / folders ─┐
+                       ├─> Visual playlist ─> Tag + group ─> Break injection ─> M3U export
+Remote media URLs ─────┘
+```
+
+### 1. Add media
+
+- Drop individual media files
+- Drop folders and preserve supported relative paths
+- Browse for multiple local files
+- Paste remote HTTP or HTTPS media URLs
+- Import structured playlist data from CSV or JSON
+
+### 2. Organize
+
+- Drag rows into playback order
+- Rename entries
+- Edit file paths and URLs
+- Add durations
+- Apply content tags
+- Assign groups or programming blocks
+- Review playlist statistics and estimated runtime
+
+### 3. Automate breaks
+
+- Build a reusable commercial library
+- Insert ads after a configurable number of content items
+- Set minimum and maximum ads per break
+- Choose random or sequential selection
+- Add pre-break and post-break bumpers
+- Create position-specific overrides
+- Save and reload injection templates
+
+### 4. Export
+
+- Preview Extended M3U output
+- Name the playlist
+- Export a clean `.m3u` file
+- Load the result into VLC or an OBS VLC Video Source
+
+---
+
+## Supported entry types
+
+| Tag | Intended use |
 |---|---|
-| `content` | Main programming — episodes, films, features |
-| `commercial` | Ad spots |
-| `bumper` | Short intro/outro clips, station IDs |
-| `interstitial` | Transitions, filler, between-segment content |
+| `content` | Shows, films, episodes, features, and main programming |
+| `commercial` | Advertisements and sponsor spots |
+| `bumper` | Station IDs, intros, outros, and break transitions |
+| `interstitial` | Short filler and between-program material |
+| `other` | Entries outside the primary categories |
 
-Click the colored tag badge on any item to cycle through tags. Use **Sort by Tag** to group your playlist by type when needed.
+---
 
-### 6. Edit item details
-<p align="left">
-  <img width="55%" height="55%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-edititem.png?raw=true"/>  
-</p>
+## Import formats
 
-Click any item's **title** to open the edit modal. From there you can update:
+### CSV
 
-- **Display name** — what appears in the `#EXTINF` line of the `.m3u`
-- **File path / URL** — the actual path or link to the file
-- **Duration** — enter in `MM:SS` or `H:MM:SS` format (e.g. `22:30`, `1:04:15`)
-- **Tag** — content type
-- **Group / Block** — optional label for grouping (e.g. `block-1`, `ad-break-2`)
+Accepted headers:
 
-### 7. Import from CSV or JSON
-<p align="left">
-  <img width="35%" height="35%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-csvjsonimport.png?raw=true"/>  
-</p>
-
-If you have a list of files already organized in a spreadsheet or data file, click **Import CSV / JSON** to load them in bulk.
-
-**CSV format:**
-```
+```csv
 path,name,duration,tag,group
-/Users/yourname/Videos/episode-01.mp4,Episode 01,22:30,content,block-1
-https://your-bucket.s3.amazonaws.com/ad.mp4,Soda Ad,0:30,commercial,ad-break-1
+/Users/you/Videos/episode-01.mp4,Episode 01,22:30,content,block-1
+https://media.example.com/ad.mp4,Soda Ad,0:30,commercial,ad-break-1
 ```
 
-**JSON format:**
+A starter file is included:
+
+```text
+playlist-template.csv
+```
+
+### JSON
+
 ```json
 [
   {
-    "path": "/Users/yourname/Videos/episode-01.mp4",
+    "path": "/Users/you/Videos/episode-01.mp4",
     "name": "Episode 01",
     "duration": "22:30",
     "tag": "content",
     "group": "block-1"
   },
   {
-    "path": "https://your-bucket.s3.amazonaws.com/ad.mp4",
+    "path": "https://media.example.com/ad.mp4",
     "name": "Soda Ad",
     "duration": "0:30",
     "tag": "commercial",
@@ -127,171 +198,245 @@ https://your-bucket.s3.amazonaws.com/ad.mp4,Soda Ad,0:30,commercial,ad-break-1
 ]
 ```
 
-Template files for both formats are included in the repo: `playlist-template.csv` and `playlist-template.json`.
+A starter file is included:
 
-### 8. Name and export your playlist
-
-<p align="left">
-  <img width="30%" height="30%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-exportnamedm3u.png?raw=true"/>  
-</p>
-
-Type a name for your playlist in the **Playlist Name** field (e.g. `saturday-night-block`). Then click **Export .M3U Playlist** — the file downloads directly to your machine as `saturday-night-block.m3u`.
-
-The exported file is compatible with both **VLC** and **OBS VLC Source**.
-
----
-
-## Commercial Injection
-
-The **💉 Commercial Injection** panel lets you automatically weave commercials, bumpers, and breaks into your content playlist using a reusable JSON template — no manual rearranging required.
-
-Click the **💉 Commercial Injection** button at the bottom of the Operations panel. It slides in from the right over the existing UI.
-
-<img width="985" height="413" alt="Screenshot 2026-06-04 at 22 23 01" src="https://github.com/user-attachments/assets/87df0e20-cfae-4401-aef7-1a93ad1e10fc" />
-
-### How it works
-
-The injector takes your content playlist and a set of rules, then outputs a fully merged playlist back into Drop Zone Ops — ready to export as a single `.m3u`.
-
-The panel has three columns:
-
-**1. Commercial Library** — your pool of ad clips. Add clips by filename (combined with the library base path) or full remote URL. 
-
-<p align="left">
-  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-comminjection-comlibrary.png?raw=true"/> 
-</p>
-
-Each clip gets a display name and optional duration. Any clip in the library can also be assigned as a pre or post break bumper.
-
-**2. Injection Rules** — where you define when and how breaks fire:
-
-<p align="left">
-  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-comminjectiondetail-rules.png?raw=true"/> 
-</p>
-
-- **Default Rule** — fires automatically every N content items. Set the interval, min/max ads per break, and selection mode
-- **Position Overrides** — fire a different rule at a specific item number, overriding the default for that break only
-- **Bumpers** — optionally assign a pre-break and/or post-break clip per rule (e.g. "After these messages..." / "And we're back...")
-
-**Selection modes:**
-
-| Mode | Behavior |
-|---|---|
-| `random` | Picks ads randomly from the library each time |
-| `sequential` | Cycles through the library in order across all breaks |
-| `specific` | Uses exact clips you name in the template |
-
-**3. JSON Template + Preview** — the live template JSON updates as you configure. 
-
-<p align="left">
-  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-comminjectiondetail-jsontemplate.png?raw=true"/> 
-</p>
-
-You can:
-- **Edit** the JSON directly (click **Edit** to unlock, **Lock** to validate and snap back)
-- **↓ Save** the template as a `.json` file to reuse across sessions
-- **Import Template JSON** to load a previously saved template
-- See a **Merged Preview** of the final injected playlist in real time, color-coded by type
-
-### Content source
-
-The injector auto-reads your current Drop Zone playlist. You can also import a separate `.m3u` or `.json` file as the content source if you want to work independently of the live playlist.
-
-### Generating the output
-
-Click **💉 INJECT & UPDATE PLAYLIST** — the injector merges your content and commercials according to the rules and replaces the Drop Zone playlist in place. Then export your `.m3u` as normal.
-
-### Template format reference
-
-The injection template is a plain JSON file you can save, share, and reuse:
-
-```json
-{
-  "name": "saturday-night-block",
-  "commercial_library": {
-    "source": "/Users/yourname/Videos/commercials/",
-    "files": [
-      { "name": "Soda Ad", "path": "soda-ad.mp4", "duration": "0:30" },
-      { "name": "Car Ad", "path": "car-ad.mp4", "duration": "0:30" },
-      { "name": "And We're Back", "path": "back-bumper.mp4", "duration": "0:08" }
-    ]
-  },
-  "breaks": {
-    "default_interval": 2,
-    "min_ads": 1,
-    "max_ads": 2,
-    "selection": "random",
-    "default_bumpers": {
-      "post": "/Users/yourname/Videos/commercials/back-bumper.mp4"
-    },
-    "overrides": [
-      {
-        "after_item": 1,
-        "min_ads": 2,
-        "max_ads": 2,
-        "selection": "sequential",
-        "bumpers": {
-          "pre": "/Users/yourname/Videos/commercials/into-break.mp4",
-          "post": "/Users/yourname/Videos/commercials/back-bumper.mp4"
-        }
-      }
-    ]
-  }
-}
+```text
+playlist-template.json
 ```
 
 ---
 
-## Using the playlist in OBS
+## M3U output
 
-<p align="left">
-  <img width="50%" height="50%" src="https://github.com/schwwaaa/drop-zone-ops/blob/v2/assets/dropzoneops-obs.png?raw=true"/>  
-</p>
+Drop Zone Ops exports Extended M3U.
 
-1. In OBS, add a new source → **VLC Video Source**
-2. Click the **+** button under the playlist and select **Add Path/URL**
-3. Point it at your exported `.m3u` file
-4. OBS will load and play through the playlist in order
-
-> **Note:** OBS's VLC source is strict about file formatting. Drop Zone Ops handles this automatically — paths are written correctly and the file ends without a trailing newline, which is required for OBS compatibility.
-
----
-
-## The M3U format
-
-An exported playlist looks like this:
-
-```
+```m3u
 #EXTM3U
 #EXTINF:1350 group-title="block-1" tvg-type="content",Episode 01
-/Users/yourname/Videos/episode-01.mp4
+/Users/you/Videos/episode-01.mp4
 #EXTINF:30 group-title="ad-break-1" tvg-type="commercial",Soda Ad
-https://your-bucket.s3.amazonaws.com/ad.mp4
-#EXTINF:8 group-title="ad-break-1" tvg-type="bumper",And We're Back
-/Users/yourname/Videos/back-bumper.mp4
+https://media.example.com/ad.mp4
 ```
 
-Each entry is two lines: a `#EXTINF` metadata line followed by the file path or URL.
+The exported metadata preserves:
+
+- Display name
+- Duration
+- Content type
+- Group or block
+- Local path or remote URL
 
 ---
 
-## Playlist stats
+## Playback targets
 
-The right panel shows a live count of items by tag and a **Total Time** display. Total time calculates automatically from any duration values you've entered on your items.
+### VLC
+
+Open the exported `.m3u` file directly in VLC.
+
+### OBS
+
+1. Add a **VLC Video Source**.
+2. Add the exported `.m3u` as a path or URL.
+3. Confirm that every local path is valid on the OBS machine.
+4. Refresh the source after replacing a playlist if OBS retains an older version.
 
 ---
 
-## Tested on
+## Local path handling
 
-- macOS (Apple Silicon)
-- Windows 10 / 11
-- Linux (Ubuntu 24.04)
+Browsers do not normally expose complete local filesystem paths for selected files.
 
-Works in Chrome, Firefox, Safari, and Edge.
+Drop Zone Ops uses a **Root Folder Path** that you provide:
+
+```text
+macOS / Linux
+/Users/you/Videos/content/
+
+Windows
+C:\Users\you\Videos\content\
+```
+
+Individual local filenames are combined with that root path. Remote URLs are left unchanged.
+
+The exported playlist must use paths that are valid on the machine running VLC or OBS.
 
 ---
 
-## Attributions
+## Architecture
 
-- Influenced by [obs_scheduler by cyberboy666](https://github.com/cyberboy666/obs_scheduler?tab=readme-ov-file)
-- Built for [schwwaaa](https://schwwaaa.net/) & [subcarrier.tv](https://subcarrier.tv/)
+Drop Zone Ops intentionally uses a simple static architecture.
+
+```text
+index.html   Landing page
+app.html     Playlist builder application
+docs.html    Full documentation
+site.js      Shared navigation and documentation interactions
+assets/      Icons, screenshots, and visual assets
+```
+
+### Runtime model
+
+- HTML
+- CSS
+- Vanilla JavaScript
+- Browser File APIs
+- In-memory playlist state
+- Client-side file generation
+- No server-side processing
+
+This keeps deployment simple and makes the repository easy to inspect, fork, modify, and host.
+
+---
+
+## Privacy and security
+
+Drop Zone Ops runs in the browser.
+
+- Media files are not uploaded by the application.
+- Playlist construction happens client-side.
+- Exported M3U files are generated locally.
+- Remote URLs remain external references.
+- Local browser security rules still apply.
+- Opening the project through a local/static server may provide more consistent browser behavior than opening files directly from disk.
+
+---
+
+## Browser and platform notes
+
+The project is intended for modern versions of:
+
+- Chrome
+- Edge
+- Firefox
+- Safari
+
+The current documentation covers use on:
+
+- macOS
+- Windows 10/11
+- Ubuntu/Linux
+
+Folder-drop behavior can vary by browser because directory traversal depends on browser file APIs.
+
+---
+
+## Repository tour
+
+```text
+.
+├── index.html
+├── app.html
+├── docs.html
+├── site.js
+├── site.webmanifest
+├── playlist-template.csv
+├── playlist-template.json
+└── assets/
+    ├── icon.png
+    ├── bayhem-hero-art.png
+    ├── dropzone-icon/
+    ├── dropzoneops-playlist-938.webp
+    └── dropzoneops-comminjectiondetail-1440.webp
+```
+
+---
+
+## Development
+
+There is no framework or dependency installation required.
+
+1. Clone the repository.
+2. Start a local static server.
+3. Edit the HTML, CSS, or JavaScript directly.
+4. Reload the browser.
+
+```bash
+git clone https://github.com/schwwaaa/drop-zone-ops.git
+cd drop-zone-ops
+python3 -m http.server 8000
+```
+
+### Good first contributions
+
+- Improve accessibility and keyboard behavior
+- Add browser regression tests
+- Expand import validation
+- Add more playlist transformation tools
+- Improve path portability between operating systems
+- Add richer template management
+- Add sample playlists and reproducible demos
+- Improve documentation screenshots and examples
+
+---
+
+## Design system
+
+The interface combines:
+
+- High-contrast broadcast tooling
+- Action-poster scale and urgency
+- Dense operational layouts
+- Orange alert/accent color
+- Cyan for media and data signals
+- Monospace technical labels
+- Condensed display typography
+- A parachute/drop-zone icon system used across the site and application
+
+The goal is not to imitate a generic dashboard. Drop Zone Ops should feel like a purpose-built broadcast operations instrument.
+
+---
+
+## Contributing
+
+Issues and pull requests are welcome.
+
+Before submitting a change:
+
+1. Test the landing page, builder, and documentation.
+2. Confirm desktop and mobile behavior.
+3. Verify local and remote playlist entries.
+4. Export an M3U and open it in VLC.
+5. Keep the project dependency-free unless a dependency provides a clear, necessary benefit.
+6. Preserve the client-side privacy model.
+
+---
+
+## Documentation
+
+The full manual includes:
+
+- Quick start
+- Adding media
+- Local base paths
+- Playlist organization
+- Entry editing
+- CSV and JSON import
+- Commercial injection
+- M3U export
+- OBS setup
+- M3U format reference
+- Troubleshooting
+- Compatibility notes
+
+Open [`docs.html`](docs.html) for the complete guide.
+
+---
+
+## Project links
+
+- [Landing page](index.html)
+- [Playlist builder](app.html)
+- [Documentation](docs.html)
+- [CSV template](playlist-template.csv)
+- [JSON template](playlist-template.json)
+
+---
+
+<div align="center">
+
+<img src="assets/icon.png" alt="" width="72">
+
+**Drop files. Build playlists. Inject breaks. Hit play.**
+
+</div>
