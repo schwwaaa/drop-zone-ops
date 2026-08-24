@@ -51,7 +51,7 @@
         
         .header {
             position: relative;
-            background-image: url('/assets/bayhem-hero-art.png');
+            background-image: url('assets/bayhem-hero-art.png');
             background-size: cover;
             background-position: center 75%;
             border-bottom: 3px solid var(--orange);
@@ -2160,7 +2160,7 @@
                         const data = JSON.parse(text);
                         const arr = Array.isArray(data) ? data : data.playlist || data.items || [];
                         arr.forEach(item => addItem({
-                            name: item.name || item.title || item.path ? .split('/').pop() || 'untitled',
+                            name: item.name || item.title || item.path?.split('/').pop() || 'untitled',
                             path: item.path || item.url || item.src || '',
                             duration: Number(item.duration) || 0,
                             tag: item.tag || item.type || item.category || 'content',
@@ -2177,7 +2177,7 @@
                             const obj = {};
                             headers.forEach((h, i) => obj[h] = (vals[i] || '').replace(/^"|"$/g, '').trim());
                             addItem({
-                                name: obj.name || obj.title || obj.path ? .split('/').pop() || 'untitled',
+                                name: obj.name || obj.title || obj.path?.split('/').pop() || 'untitled',
                                 path: obj.path || obj.url || obj.src || '',
                                 duration: Number(obj.duration) || 0,
                                 tag: obj.tag || obj.type || obj.category || 'content',
